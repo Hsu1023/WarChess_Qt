@@ -2,21 +2,15 @@
 #define MAP_H
 
 #include "config.h"
-#include <QWidget>
 
-class Map : public QWidget
+class Map
 {
-    Q_OBJECT
 public:
-    explicit Map(QWidget *parent = nullptr);
+    Map();
 public:
     QPixmap m_map1;
     int m_x, m_y;
-signals:
-
-public slots:
-    void paint(QPainter&)const;
-    //void calculatePicPosition()const;
+    //void paint(QPainter&)const;
 };
 
 #endif // MAP_H

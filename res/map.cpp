@@ -1,10 +1,6 @@
 #include "map.h"
 
-Map::Map(QWidget *parent) : QWidget(parent)
+Map::Map()
 {
     m_map1.load(MAP_PATH);
-}
-void Map::paint(QPainter& painter)const
-{
-
 }
