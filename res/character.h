@@ -2,28 +2,26 @@
 #define CHARACTER_H
 
 #include "config.h"
-#include <QWidget>
+#include "characterdlg.h"
 
-class Character: public QWidget
+class Character
 {
-    Q_OBJECT
 public:
-    Character(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny, QWidget* parent = nullptr);
+    Character(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny);
 public:
     int m_attrack, m_move, m_fullblood, m_blood;
     int m_cellx, m_celly; //  全局位置
     int m_localCellx, m_localCelly; // 桌面位置
     QPixmap icon;
-    QLabel *dlg;
-    QString name;
+    CharacterDlg *dlg;
 public:
-    void setLabel();
+    void drawCharacter(QPainter &);
 };
 
 class Warrior: public Character
 {
 public:
-    Warrior(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny, QWidget* parent = nullptr);
+    Warrior(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny);
 };
 
 #endif // CHARACTER_H

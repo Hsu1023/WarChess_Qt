@@ -22,7 +22,6 @@ protected:
     int m_x, m_y;
     int mousex, mousey;
     int mouseCellx, mouseCelly;
-    int mouseLocalCellx, mouseLocalCelly;
     Character * character[10];
     int characterNum;
 signals:
