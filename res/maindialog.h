@@ -4,17 +4,21 @@
 #include "map.h"
 #include "character.h"
 #include "config.h"
-
+#include "algorithm.h"
 
 class MainDialog : public QDialog
 {
     Q_OBJECT
-
 public:
+    FindPathAlgorithm moveAl, attrackAl;
+public:
+
     MainDialog(QWidget *parent = nullptr);
     ~MainDialog();
     void paintEvent(QPaintEvent*)override;
     void mouseMoveEvent(QMouseEvent*)override;
+
+    void mousePressEvent(QMouseEvent*)override;
     void setScreenMoveTimer();
     void checkScreenMove();
     void updateMousePosition(QMouseEvent*);
@@ -26,6 +30,7 @@ protected:
     int mouseLocalCellx, mouseLocalCelly;
     Character * character[10];
     int characterNum;
+    int gameState;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();
@@ -34,5 +39,7 @@ signals:
     void moveScreen();
 public slots:
     void redrawCharacter();
+    void characterMoveEvent(Character*);
+    void characterAttrackEvent(Character*);
 };
 #endif // MAINDIALOG_H

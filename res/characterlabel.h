@@ -4,16 +4,25 @@
 #include <QLabel>
 #include "config.h"
 
-class CharacterLabel: public QLabel
+class CharacterProperty: public QLabel
 {
     Q_OBJECT
 public:
-    CharacterLabel(QString, int, int, int, QWidget* parent = nullptr);
+    CharacterProperty(QString, int, int, int, QWidget* parent = nullptr);
 public:
     QGridLayout layout;
     QLabel nameLabel, hpLabel1, hpLabel2;
-    int x, y;
     void updateData(int hp, int fullhp, int move, int fullmove, int localx, int localy);
+};
+
+class CharacterSelection: public QLabel
+{
+    Q_OBJECT
+public:
+    CharacterSelection(QWidget* parent = nullptr);
+public:
+    QVBoxLayout *layout;
+    QPushButton *moveButton, *attrackButton, *skipButton;
 };
 
 #endif // CHARACTERLABEL_H

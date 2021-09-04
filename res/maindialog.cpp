@@ -1,10 +1,10 @@
 #include "maindialog.h"
 #include "character.h"
+#include "algorithm.h"
 
 MainDialog::MainDialog(QWidget *parent)
     : QDialog(parent)
 {
-
     m_x = 0; m_y = 0;
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -18,7 +18,14 @@ MainDialog::MainDialog(QWidget *parent)
     connect(this, &MainDialog::moveScreen, this, &MainDialog::redrawCharacter);
     connect(this, &MainDialog::moveScreen, [=](){repaint();});
 
+    gameState = BEGIN;
 
+    for(int i=0;i<characterNum;i++)
+    {
+        connect(character[i],&Character::characterMoveAction,this,&MainDialog::characterMoveEvent);
+
+        connect(character[i],&Character::characterAttrackAction,this,&MainDialog::characterAttrackEvent);
+    }
     emit moveScreen();
 }
 MainDialog::~MainDialog()
@@ -31,7 +38,6 @@ void MainDialog::redrawCharacter()
         character[i]->show();
         character[i]->setGeometry((character[i]->m_localCellx - 1) * CELL_SIZE,
                           (character[i]->m_localCelly - 1) * CELL_SIZE, 64, 64);
-        qDebug()<<(character[i]->m_localCelly - 1) * CELL_SIZE;
     }
 }
 void MainDialog::paintEvent(QPaintEvent *)
@@ -41,11 +47,13 @@ void MainDialog::paintEvent(QPaintEvent *)
     painter.drawPixmap(m_x, m_y, m_map.m_map1);
 
     // 方框标白
-    painter.setPen(QPen(Qt::white,3));
+    painter.setPen(QPen(Qt::white,4));
     painter.drawRect((mouseCellx + m_x/CELL_SIZE - 1)*CELL_SIZE,
                      (mouseCelly + m_y/CELL_SIZE - 1)*CELL_SIZE,
                      CELL_SIZE, CELL_SIZE);
     painter.setPen(Qt::NoPen);
+
+
     // 加入血条
     for(int i=0;i<characterNum;i++)
     {
@@ -58,17 +66,107 @@ void MainDialog::paintEvent(QPaintEvent *)
                          (character[i]->m_localCelly - 1) * CELL_SIZE - HP_DISTANCE, CELL_SIZE, HP_HEIGHT);
         painter.setPen(Qt::NoPen);
     }
+    if(gameState == FINDPATH)
+    {
+        for(int i=1;i<=50;i++)
+            for(int j=1;j<=30;j++)
+                if(moveAl.resultMap[i][j]!=-1)
+                {
+                    painter.setPen(QPen(Qt::blue,2));
+                    painter.drawRect((i + m_x/CELL_SIZE - 1)*CELL_SIZE,
+                                     (j + m_y/CELL_SIZE - 1)*CELL_SIZE,
+                                     CELL_SIZE, CELL_SIZE);
+                    painter.setPen(Qt::NoPen);
+                }
+        //TODO: hint there's no way
+    }
 
+    else if(gameState==FINDATTRACK)
+    {
+        for(int i=0;i<characterNum;i++)
+        {
+            if(character[i]->characterState!=BEGIN||character[i]->characterState!=END)continue;
+            //TODO: enemy continue
+            if(attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]!=-1)
+            {
+                painter.setPen(QPen(Qt::red,2));
+                painter.drawRect((character[i]->m_cellx + m_x/CELL_SIZE - 1)*CELL_SIZE,
+                                 (character[i]->m_celly + m_y/CELL_SIZE - 1)*CELL_SIZE,
+                                 CELL_SIZE, CELL_SIZE);
+                painter.setPen(Qt::NoPen);
+            }
+
+            //TODO: hint Nobody can be attracked
+        }
+    }
+}
+void MainDialog::mousePressEvent(QMouseEvent* event)
+{
+    updateMousePosition(event);
+    if(gameState==BEGIN)
+    {
+        //选择对话框
+        for(int i = 0; i <characterNum; i++)
+        {
+            if(mouseLocalCellx==character[i]->m_localCellx&&
+                    mouseLocalCelly==character[i]->m_localCelly)
+            {
+                character[i]->selectionDlg->show();
+                character[i]->selectionDlg->setGeometry((character[i]->m_localCellx-1)*CELL_SIZE+64,(character[i]->m_localCelly-1)*CELL_SIZE-10,80,80);
+            }
+            else
+            {
+                if(character[i]->selectionDlg->isHidden()==false)
+                    character[i]->selectionDlg->hide();
+            }
+        }
+    }
+    else if(gameState==FINDPATH)
+    {
+        if(moveAl.resultMap[mouseCellx][mouseCelly]!=-1)
+        {
+            gameState=MOVING;
+
+            //TODO:Moving jianqu
+        }
+        else gameState=BEGIN;
+    }
+    else if(gameState==FINDATTRACK)
+    {
+            //TODO:
+    }
+}
+void MainDialog::characterMoveEvent(Character* nowCharacter)
+{
+    memset(moveAl.resultMap, -1, sizeof moveAl.resultMap);
+    gameState=FINDPATH;
+    moveAl.setMove(nowCharacter->m_move);
+    moveAl.findAvailableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0);
+    for(int i=0;i<characterNum;i++)
+        if(nowCharacter!=character[i])
+        {
+            moveAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=-1;
+        }
+    repaint();
+}
+void MainDialog::characterAttrackEvent(Character* nowCharacter)
+{
+    memset(attrackAl.resultMap, -1, sizeof attrackAl.resultMap);
+    gameState=FINDATTRACK;
+    attrackAl.setMove(nowCharacter->m_move);
+    attrackAl.findAvailableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0);
+
+    repaint();
 }
 void MainDialog::mouseMoveEvent(QMouseEvent* event)
 {
     updateMousePosition(event);
     checkScreenMove();
     update();
+    //qDebug()<<mouseCellx<<"/"<<mouseCelly;
 }
 void MainDialog::updateMousePosition(QMouseEvent* event)
 {
-
     QPointF point = event->localPos();
     mousex = point.x();
     mousey = point.y();

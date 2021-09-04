@@ -11,16 +11,25 @@ class Character: public QLabel
 public:
     Character(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny, QWidget* parent = nullptr);
 public:
-    int  m_hp, m_fullhp, m_move,m_fullmove,m_attrack;
+    int m_hp, m_fullhp, m_move,m_fullmove,m_attrack;
     int m_cellx, m_celly; //  全局位置
     int m_localCellx, m_localCelly; // 桌面位置
     QPixmap icon;
-    CharacterLabel *dlg;
+    CharacterProperty *propertyDlg;
+    CharacterSelection *selectionDlg;
     QString name;
+    int characterState;
 public:
     void setLabel();
     void enterEvent(QEvent *)override;
     void leaveEvent(QEvent *)override;
+public slots:
+    void moveAction();
+    void attrackAction();
+    void skipAction();
+signals:
+    void characterMoveAction(Character*);
+    void characterAttrackAction(Character*);
 };
 
 class Warrior: public Character
