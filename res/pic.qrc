@@ -3,5 +3,6 @@
         <file>pic/map1.png</file>
         <file>pic/warrior_0.png</file>
         <file>pic/dlg.png</file>
+        <file>pic/close.png</file>
     </qresource>
 </RCC>
