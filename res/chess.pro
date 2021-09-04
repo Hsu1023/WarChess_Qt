@@ -10,12 +10,14 @@ CONFIG += c++11
 
 SOURCES += \
     character.cpp \
+    characterlabel.cpp \
     main.cpp \
     maindialog.cpp \
     map.cpp
 
 HEADERS += \
     character.h \
+    characterlabel.h \
     config.h \
     maindialog.h \
     map.h
@@ -27,3 +29,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     pic.qrc
+
+DISTFILES +=
