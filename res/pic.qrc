@@ -1,7 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>pic/map1.png</file>
-        <file>pic/warrior_0.png</file>
         <file>pic/dlg.png</file>
+        <file>pic/map1.png</file>
+        <file>pic/map1.psd</file>
+        <file>pic/warrior_0.png</file>
+        <file>pic/warrior_down_1.png</file>
+        <file>pic/warrior_down_2.png</file>
+        <file>pic/warrior_down_3.png</file>
+        <file>pic/warrior_down_4.png</file>
     </qresource>
 </RCC>
