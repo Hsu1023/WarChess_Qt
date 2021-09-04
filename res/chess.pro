@@ -10,12 +10,14 @@ CONFIG += c++11
 
 SOURCES += \
     character.cpp \
+    characterdlg.cpp \
     main.cpp \
     maindialog.cpp \
     map.cpp
 
 HEADERS += \
     character.h \
+    characterdlg.h \
     config.h \
     maindialog.h \
     map.h

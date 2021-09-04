@@ -6,18 +6,14 @@ MainDialog::MainDialog(QWidget *parent)
 {
     m_x = 0; m_y = 0;
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-
     setMouseTracking(true);
     setMouseMoveTimer();
-/*
-    CharacterDlg *c = new CharacterDlg(this);
-    c->setMouseTracking(false);
-    c->;
-*/
-    characterNum = 2;
-    character[0] = new Warrior(2, 2, m_x, m_y, this);
-    character[1] = new Warrior(5, 5, m_x, m_y, this);
 
+
+
+    characterNum = 2;
+    character[0] = new Warrior(2, 2, m_x, m_y);
+    character[1] = new Warrior(5, 5, m_x, m_y);
 }
 MainDialog::~MainDialog()
 {
@@ -27,6 +23,7 @@ void MainDialog::paintEvent(QPaintEvent *)
     QPainter painter(this);
     // 画背景图
     painter.drawPixmap(m_x, m_y, m_map.m_map1);
+
     for(int i = 0;i <characterNum; i++)
     {
         Character *temp = character[i];
@@ -34,20 +31,17 @@ void MainDialog::paintEvent(QPaintEvent *)
         painter.setBrush(Qt::red);
         painter.drawRect((temp->m_localCellx - 1) * CELL_SIZE,
                          (temp->m_localCelly - 1) * CELL_SIZE - HP_DISTANCE, (1.0 * temp->m_blood / temp->m_fullblood)*CELL_SIZE, HP_HEIGHT);
-        painter.setBrush(Qt::NoBrush);
         painter.setPen(Qt::black);
-
+        painter.setBrush(Qt::NoBrush);
         painter.drawRect((temp->m_localCellx - 1) * CELL_SIZE,
                          (temp->m_localCelly - 1) * CELL_SIZE - HP_DISTANCE, CELL_SIZE, HP_HEIGHT);
-        painter.setPen(Qt::NoPen);
     }
 
-    // 方框
+    // 画鼠标移动选中的框
     painter.setPen(QPen(Qt::white,3));
     painter.drawRect((mouseCellx + m_x/CELL_SIZE - 1)*CELL_SIZE,
                      (mouseCelly + m_y/CELL_SIZE - 1)*CELL_SIZE,
                      CELL_SIZE, CELL_SIZE);
-    painter.setPen(Qt::NoPen);
 }
 void MainDialog::mouseMoveEvent(QMouseEvent* event)
 {
@@ -81,31 +75,6 @@ void MainDialog::mouseMoveEvent(QMouseEvent* event)
 
     mouseCellx = (-m_x + mousex) / CELL_SIZE + 1;
     mouseCelly = (-m_y + mousey) / CELL_SIZE + 1;
-
-    mouseLocalCellx = (mousex) / CELL_SIZE + 1;
-    mouseLocalCelly = (mousey) / CELL_SIZE + 1;
-
-    for(int i = 0; i < characterNum; i++)
-    {
-        if(mouseLocalCellx == character[i]->m_localCellx&&mouseLocalCelly==character[i]->m_localCelly)
-        {
-            if(character[i]->dlg)continue;
-            qDebug()<<character[i]->dlg;
-            //
-            character[i]->setLabel();
-            character[i]->dlg->raise();
-
-            qDebug()<<character[i]->dlg;
-
-            qDebug()<<character[i]->dlg->isHidden();
-        }
-        else
-        {
-            if(character[i]->dlg==nullptr)continue;
-            character[i]->dlg->close();
-            character[i]->dlg = nullptr;
-        }
-    }
     update();
     //qDebug()<<mouseCellx<<"\\"<<mouseCelly;
 }
