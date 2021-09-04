@@ -15,9 +15,8 @@ public:
     ~MainDialog();
     void paintEvent(QPaintEvent*)override;
     void mouseMoveEvent(QMouseEvent*)override;
-    void setScreenMoveTimer();
-    void checkScreenMove();
-    void updateMousePosition(QMouseEvent*);
+    void setMouseMoveTimer();
+    void paintCurCell();
 protected:
     Map m_map;
     int m_x, m_y;
@@ -31,8 +30,5 @@ signals:
     void moveLeft(); void notMoveLeft();
     void moveUp(); void notMoveUp();
     void moveDown(); void notMoveDown();
-    void moveScreen();
-public slots:
-    void redrawCharacter();
 };
 #endif // MAINDIALOG_H

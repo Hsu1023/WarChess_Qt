@@ -33,7 +33,7 @@
 #define HP_DISTANCE 10
 
 #define MAP_PATH  "://pic/map1.png"
-#define WARRIOR_PATH ":/pic/warrior_0.png"
+#define WARRIOR_PATH "://pic/warrior_0.png"
 
 
 
