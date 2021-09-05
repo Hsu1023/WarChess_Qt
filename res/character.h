@@ -8,7 +8,9 @@
 class Character: public QLabel
 {
     Q_OBJECT
+
 public:
+    enum CHARACTERSTATE{BEGIN,FINDPATH,FINDATTRACK,END,DEAD};
     Character(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny, QWidget* parent = nullptr);
 public:
     int m_hp, m_fullhp, m_move,m_fullmove,m_attrack, m_attrackable;
@@ -19,6 +21,7 @@ public:
     CharacterSelection *selectionDlg;
     QString name;
     int characterState;
+    bool attrackedOrNot;//攻击为1，未攻击为0
 public:
     void setLabel();
     void enterEvent(QEvent *)override;
@@ -33,6 +36,8 @@ signals:
     void characterAttrackAction(Character*);
     void infoChanged();
     void beAttracked(int attrack);
+    void dieOneCharacter(Character*);//
+    void endOneCharacter(Character*);//
 };
 
 class Warrior: public Character

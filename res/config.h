@@ -35,7 +35,6 @@
 #define MAP_PATH  "://pic/map1.png"
 #define WARRIOR_PATH ":/pic/warrior_0.png"
 
-enum GAMESTATE{BEGIN, FINDPATH,MOVING, FINDATTRACK, ATTRACKING,END};
 
 const int binMap[31][51]=
 {

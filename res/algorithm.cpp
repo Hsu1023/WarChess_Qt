@@ -19,10 +19,14 @@ void FindPathAlgorithm::findAvailableCell(int x, int y, int depth, Character* ch
     }
     else resultMap[x][y]=depth;
     if(depth==totalMove)return;
-    if(x-1>=1&&binMap[x-1][y]!=0)findAvailableCell(x-1,y,depth+1,character,characterNum);
-    if(x+1<=50&&binMap[x+1][y]!=0)findAvailableCell(x+1,y,depth+1,character,characterNum);
-    if(y+1<=30&&binMap[x][y+1]!=0)findAvailableCell(x,y+1,depth+1,character,characterNum);
-    if(y-1>=1&&binMap[x][y-1]!=0)findAvailableCell(x,y-1,depth+1,character,characterNum);
+    if(x-1>=1&&binMap[x-1][y]!=0)
+        findAvailableCell(x-1,y,depth+1,character,characterNum);
+    if(x+1<=50&&binMap[x+1][y]!=0)
+        findAvailableCell(x+1,y,depth+1,character,characterNum);
+    if(y+1<=30&&binMap[x][y+1]!=0)
+        findAvailableCell(x,y+1,depth+1,character,characterNum);
+    if(y-1>=1&&binMap[x][y-1]!=0)
+        findAvailableCell(x,y-1,depth+1,character,characterNum);
 }
 void FindPathAlgorithm::setMove(int t_move, Character *t_nowCharacter)
 {

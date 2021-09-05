@@ -3,7 +3,7 @@
 
 Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, QWidget* parent):
     QLabel(parent),
-    m_cellx(t_cellx), m_celly(t_celly), characterState(BEGIN),
+    m_cellx(t_cellx), m_celly(t_celly), characterState(BEGIN),attrackedOrNot(false),
     m_localCellx(t_cellx - LocalScreenx / CELL_SIZE),
     m_localCelly(t_celly - LocalScreeny / CELL_SIZE)
 {
@@ -12,6 +12,12 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
 
     connect(this, &Character::infoChanged,[=](){
         //按顺序，raise有次序
+        if(characterState==DEAD)
+        {
+            propertyDlg->close();
+            selectionDlg->close();
+            hide();
+        }
         propertyDlg->updateData(m_hp,m_fullhp,m_move,m_fullmove,m_localCellx,m_localCelly);
         selectionDlg->updateData(m_localCellx,m_localCelly);
     });
@@ -42,8 +48,6 @@ Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, 
     setPixmap(icon);
 
     setMouseTracking(true);
-    //selectionDlg->setMouseTracking(true);
-    //propertyDlg->setMouseTracking(true);
     propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack, parent);
     propertyDlg->hide();
 
@@ -57,6 +61,9 @@ void Character::enterEvent(QEvent *)
         propertyDlg->show();
         propertyDlg->updateData(m_hp, m_fullhp, m_move, m_fullmove, m_localCellx, m_localCelly);
         propertyDlg->raise();
+        QTimer::singleShot(1000,[=](){
+              propertyDlg->hide();
+        });
     }
 }
 void Character::leaveEvent(QEvent *)
@@ -71,18 +78,18 @@ void Character::moveAction()
         selectionDlg->hide();
     characterState = FINDPATH;
     emit characterMoveAction(this);
-    //characterState = BEGIN;
 }
 void Character::attrackAction()
 {
+    if(attrackedOrNot)
+    {
+        //hint has attracked
+        return;
+    }
+    if(selectionDlg->isHidden()==false)
+        selectionDlg->hide();
     characterState = FINDATTRACK;
     emit characterAttrackAction(this);
-    //characterState = BEGIN;
-}
-void Character::skipAction()
-{
-    characterState = END;
-    selectionDlg->hide();
 }
 void Character::attrackedEvent(int attrack)
 {
@@ -97,5 +104,16 @@ void Character::attrackedEvent(int attrack)
     tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
     QTimer::singleShot(1000,[=](){delete tempLabel;});
 
+    if(m_hp<=0)
+    {
+        characterState=DEAD;
+        emit dieOneCharacter(this);//TODO:slot
+    }
     emit infoChanged();
+}
+void Character::skipAction()
+{
+    characterState = END;
+    selectionDlg->hide();
+    emit endOneCharacter(this);//TODO:slot
 }

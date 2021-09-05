@@ -12,6 +12,7 @@ class MainDialog : public QDialog
 public:
     FindPathAlgorithm moveAl, attrackAl;
 public:
+    enum GAMESTATE{BEGIN,FINDPATH,FINDATTRACK};
 
     MainDialog(QWidget *parent = nullptr);
     ~MainDialog();

@@ -56,6 +56,7 @@ void MainDialog::paintEvent(QPaintEvent *)
     // 加入血条
     for(int i=0;i<characterNum;i++)
     {
+        if(character[i]->characterState==Character::DEAD)continue;
         painter.setBrush(Qt::red);
         painter.drawRect((character[i]->m_localCellx - 1) * CELL_SIZE,
                          (character[i]->m_localCelly - 1) * CELL_SIZE - HP_DISTANCE, (1.0 * character[i]->m_hp / character[i]->m_fullhp)*CELL_SIZE, HP_HEIGHT);
@@ -85,7 +86,7 @@ void MainDialog::paintEvent(QPaintEvent *)
         //寻找可攻击对象
         for(int i=0;i<characterNum;i++)
         {
-            if(character[i]->characterState!=BEGIN&&character[i]->characterState!=END)continue;
+            if(character[i]->characterState!=BEGIN&&character[i]->characterState!=Character::END)continue;
             if(character[i]==nowCharacter)continue;
             //TODO: enemy continue
             if(attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]!=-1)
@@ -110,10 +111,13 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         for(int i = 0; i <characterNum; i++)
         {
             if(character[i]->characterState!=BEGIN)continue;
+            //点中了人物
             if(mouseLocalCellx==character[i]->m_localCellx&&
                     mouseLocalCelly==character[i]->m_localCelly)
             {
-                if(character[i]->characterState==END)continue;
+                if(character[i]->characterState==Character::END||
+                        character[i]->characterState==Character::DEAD)continue;
+                //显示选择框
                 if(character[i]->selectionDlg->isHidden())
                 {
                     character[i]->selectionDlg->show();
@@ -122,7 +126,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
                 }
             }
             else
-            {
+            {   //点错收回选择框
                 if(character[i]->selectionDlg->isHidden()==false)
                     character[i]->selectionDlg->hide();
             }
@@ -132,7 +136,6 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
     {
         if(moveAl.resultMap[mouseCellx][mouseCelly]!=-1)
         {
-            gameState=MOVING;
             nowCharacter->m_move-=moveAl.resultMap[mouseCellx][mouseCelly];
             nowCharacter->m_cellx = mouseCellx;
             nowCharacter->m_celly = mouseCelly;
@@ -159,6 +162,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
                     emit character[i]->beAttracked(nowCharacter->m_attrack);
                     gameState=BEGIN;
                     nowCharacter->characterState=BEGIN;
+                    nowCharacter->attrackedOrNot=true;
                     break;
                 }
             }
