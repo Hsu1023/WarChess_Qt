@@ -3,7 +3,7 @@
 
 Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, QWidget* parent):
     QLabel(parent),
-    m_cellx(t_cellx), m_celly(t_celly), characterState(BEGIN),attrackedOrNot(false),
+    m_cellx(t_cellx), m_celly(t_celly), characterState(BEGIN), attrackedOrNot(false),
     m_localCellx(t_cellx - LocalScreenx / CELL_SIZE),
     m_localCelly(t_celly - LocalScreeny / CELL_SIZE)
 {
@@ -48,7 +48,7 @@ Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, 
     setPixmap(icon);
 
     setMouseTracking(true);
-    propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack, parent);
+    propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack,m_attrackable, parent);
     propertyDlg->hide();
 
     emit infoChanged();
@@ -116,4 +116,8 @@ void Character::skipAction()
     characterState = END;
     selectionDlg->hide();
     emit endOneCharacter(this);//TODO:slot
+}
+void Character::updateInfo()
+{
+    emit infoChanged();
 }

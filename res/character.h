@@ -31,6 +31,7 @@ public slots:
     void attrackAction();
     void skipAction();
     void attrackedEvent(int attrack);
+    void updateInfo();
 signals:
     void characterMoveAction(Character*);
     void characterAttrackAction(Character*);

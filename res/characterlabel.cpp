@@ -1,6 +1,6 @@
 #include "characterlabel.h"
 
-CharacterProperty::CharacterProperty(QString name, int fullhp, int fullmove, int attrack, QWidget *parent):
+CharacterProperty::CharacterProperty(QString name, int fullhp, int fullmove, int attrack, int attrackable, QWidget *parent):
     QLabel(parent)
 {
     setFixedSize(165, 150);
@@ -13,6 +13,8 @@ CharacterProperty::CharacterProperty(QString name, int fullhp, int fullmove, int
     moveLabel2.setText(QString::number(fullmove)+"/"+QString::number(fullmove));
     attrackLabel1.setText("攻击力");
     attrackLabel2.setText(QString::number(attrack));
+    attrackableLabel1.setText("攻击范围");
+    attrackableLabel2.setText(QString::number(attrackable));
 
     layout.addWidget(&nameLabel,0,0);
     layout.addWidget(&hpLabel1,1,0);
@@ -21,6 +23,8 @@ CharacterProperty::CharacterProperty(QString name, int fullhp, int fullmove, int
     layout.addWidget(&moveLabel2,2,1);
     layout.addWidget(&attrackLabel1,3,0);
     layout.addWidget(&attrackLabel2,3,1);
+    layout.addWidget(&attrackableLabel1,4,0);
+    layout.addWidget(&attrackableLabel2,4,1);
     layout.setVerticalSpacing(0);
     setLayout(&layout);
 }
@@ -59,8 +63,9 @@ CharacterSelection::CharacterSelection(QWidget* parent):
 void CharacterSelection::updateData(int localCellx, int localCelly)
 {
     bool ishidden = isHidden();
-    move((localCellx-1)*CELL_SIZE+64,(localCelly-1)*CELL_SIZE-10);
-    if(ishidden)hide(); else
+    move((localCellx-1)*CELL_SIZE + 64,(localCelly-1)*CELL_SIZE-10);
+    if(ishidden)hide();
+    else
     {
         show();
         raise();

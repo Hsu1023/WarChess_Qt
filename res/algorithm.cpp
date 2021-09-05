@@ -9,7 +9,7 @@ void FindPathAlgorithm::findAvailableCell(int x, int y, int depth, Character* ch
 {
     for(int i=0;i<characterNum;i++)
         //遇见敌人绕不过去
-        if(character[i]!=nowCharacter)
+        if(character[i]!=nowCharacter&&character[i]->characterState!=Character::DEAD)
         {
             if(character[i]->m_cellx==x&&character[i]->m_celly==y)return;
         }

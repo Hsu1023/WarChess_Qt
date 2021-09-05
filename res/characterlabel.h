@@ -8,12 +8,13 @@ class CharacterProperty: public QLabel
 {
     Q_OBJECT
 public:
-    CharacterProperty(QString, int, int, int, QWidget* parent = nullptr);
+    CharacterProperty(QString, int, int, int,int, QWidget* parent = nullptr);
 public:
     QGridLayout layout;
-    QLabel nameLabel, hpLabel1, hpLabel2, moveLabel1, moveLabel2, attrackLabel1, attrackLabel2;
+    QLabel nameLabel, hpLabel1, hpLabel2, moveLabel1, moveLabel2, attrackLabel1, attrackLabel2, attrackableLabel1, attrackableLabel2;
     void updateData(int hp, int fullhp, int move, int fullmove, int localCellx, int localCelly);
 };
+
 class CharacterSelection: public QLabel
 {
     Q_OBJECT
