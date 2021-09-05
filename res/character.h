@@ -39,6 +39,8 @@ signals:
     void beAttracked(int attrack);
     void dieOneCharacter(Character*);//
     void endOneCharacter(Character*);//
+    void submitHint(QString);
+    void hideCancelButton();
 };
 
 class Warrior: public Character

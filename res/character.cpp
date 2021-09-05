@@ -83,7 +83,8 @@ void Character::attrackAction()
 {
     if(attrackedOrNot)
     {
-        //hint has attracked
+        emit submitHint("本回合已攻击过");
+        emit hideCancelButton();
         return;
     }
     if(selectionDlg->isHidden()==false)
@@ -95,6 +96,7 @@ void Character::attrackedEvent(int attrack)
 {
     m_hp -= attrack;
 
+    //扣血
     QLabel *tempLabel= new QLabel(parentWidget());
     tempLabel->setAttribute(Qt::WA_DeleteOnClose);
     tempLabel->setStyleSheet("color:red; font:bold; font-size:20px;");

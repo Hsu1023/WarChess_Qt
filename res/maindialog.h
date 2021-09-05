@@ -5,6 +5,8 @@
 #include "character.h"
 #include "config.h"
 #include "algorithm.h"
+#include "clicklabel.h"
+#include "hintlabel.h"
 
 class MainDialog : public QDialog
 {
@@ -21,6 +23,7 @@ public:
 
     void mousePressEvent(QMouseEvent*)override;
     void setScreenMoveTimer();
+    void setButton();
     void checkScreenMove();
     void updateMousePosition(QMouseEvent*);
     void nextRound(int last);
@@ -37,6 +40,8 @@ protected:
     int aliveNum[2];
     int roundNum[2];
     bool roundBelonged;
+    ClickLabel *cancelButton, *skipButton, *menuButton, *musicButton;
+    HintLabel *hint;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();
@@ -50,5 +55,6 @@ public slots:
     void characterAttrackEvent(Character*);
     void endOneCharacterEvent(Character*);
     void dieOneCharacterEvent(Character*);
+    void receiveHint(QString str);
 };
 #endif // MAINDIALOG_H

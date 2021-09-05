@@ -7,6 +7,8 @@ FindPathAlgorithm::FindPathAlgorithm()
 }
 void FindPathAlgorithm::findAvailableCell(int x, int y, int depth, Character* character[], int characterNum)
 {
+    if(binMap[x][y]==0)return;
+    qDebug()<<resultMap[11][15];
     for(int i=0;i<characterNum;i++)
         //遇见敌人绕不过去
         if(character[i]!=nowCharacter&&character[i]->characterState!=Character::DEAD)

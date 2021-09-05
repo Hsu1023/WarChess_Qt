@@ -1,7 +1,8 @@
 #include "maindialog.h"
 #include "character.h"
+#include "hintlabel.h"
 #include "algorithm.h"
-
+//TODO: cancelButton大一点易看见变化
 MainDialog::MainDialog(QWidget *parent)
     : QDialog(parent)
 {
@@ -9,6 +10,10 @@ MainDialog::MainDialog(QWidget *parent)
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setMouseTracking(true);
     setScreenMoveTimer();
+
+    setButton();
+    hint = new HintLabel(this);
+    hint->hide();
 
     characterNum = 4;
     character[0] = new Warrior(10, 10, m_x, m_y, this);characterBelonged[0]=YOURS;
@@ -20,6 +25,7 @@ MainDialog::MainDialog(QWidget *parent)
     for(int i=0;i<characterNum;i++)
         aliveNum[characterBelonged[i]]++;
     roundBelonged=MINE;
+    receiveHint("蓝方回合");
     roundNum[MINE]=aliveNum[MINE];
     roundNum[YOURS]=aliveNum[YOURS];
 
@@ -41,11 +47,57 @@ MainDialog::MainDialog(QWidget *parent)
         connect(character[i],&Character::characterAttrackAction,this,&MainDialog::characterAttrackEvent);
         connect(character[i],&Character::endOneCharacter,this,&MainDialog::endOneCharacterEvent);
         connect(character[i],&Character::dieOneCharacter,this,&MainDialog::dieOneCharacterEvent);
+        connect(character[i],&Character::submitHint, this, &MainDialog::receiveHint);
+        connect(character[i],&Character::hideCancelButton, [=](){emit cancelButton->clicked();});
     }
     emit moveScreen();
+
 }
 MainDialog::~MainDialog()
 {
+}
+void MainDialog::setButton()
+{
+    cancelButton = new ClickLabel(this);
+    cancelButton->setPixmap(QPixmap(":/pic/cancel_button.png"));
+    cancelButton->setGeometry(1150,830,60,48);
+    cancelButton->setStyleSheet("border:none;");
+    cancelButton->hide();
+
+    skipButton = new ClickLabel(this);
+    skipButton->setPixmap(QPixmap(":/pic/skip_button.png"));
+    skipButton->setGeometry(1250,830,60,48);
+    skipButton->setStyleSheet("border:none;");
+
+    musicButton = new ClickLabel(this);
+    musicButton->setPixmap(QPixmap(":/pic/music_button.png"));
+    musicButton->setGeometry(1350,830,60,48);
+    musicButton->setStyleSheet("border:none;");
+
+    menuButton = new ClickLabel(this);
+    menuButton->setPixmap(QPixmap(":/pic/menu_button.png"));
+    menuButton->setGeometry(1450,830,60,48);
+    menuButton->setStyleSheet("border:none;");
+
+    connect(cancelButton, &ClickLabel::clicked, [=](){
+       nowCharacter->characterState = BEGIN;
+       //TODO : bug - selectionDlg无法显示
+       nowCharacter->selectionDlg->show();
+       nowCharacter->selectionDlg->raise();
+       gameState = BEGIN;
+       cancelButton->hide();
+       repaint();
+    });
+    connect(skipButton, &ClickLabel::clicked, [=](){
+        cancelButton->hide();
+        nextRound(roundBelonged);
+    });
+    connect(musicButton, &ClickLabel::clicked, [=](){
+        //TODO:
+    });
+    connect(menuButton, &ClickLabel::clicked, [=](){
+        //TODO:
+    });
 }
 void MainDialog::redrawCharacter()
 {
@@ -62,15 +114,19 @@ void MainDialog::nextRound(int last)
     int next = last ^ 1;
     roundBelonged = next;
     gameState = BEGIN;
+    //更新下一回合character
     for(int i = 0; i < characterNum; i++)
     {
         if(characterBelonged[i]==next&&character[i]->characterState!=Character::DEAD)
         {
             character[i]->characterState = Character::BEGIN;
             character[i]->attrackedOrNot = false;
+            character[i]->m_move = character[i]->m_fullmove;
         }
     }
     roundNum[next] = aliveNum[next];
+    if(last==MINE)receiveHint("红方回合");
+    else receiveHint("蓝方回合");
     repaint();
 }
 void MainDialog::endOneCharacterEvent(Character* endedCharacter)
@@ -85,7 +141,7 @@ void MainDialog::endOneCharacterEvent(Character* endedCharacter)
         }
     }
     roundNum[characterBelonged[id]]--;
-
+    cancelButton->hide();
     qDebug()<<roundNum[characterBelonged[id]];
     if(roundNum[characterBelonged[id]]==0)
         nextRound(characterBelonged[id]);
@@ -115,28 +171,32 @@ void MainDialog::paintEvent(QPaintEvent *)
     // 画背景图
     painter.drawPixmap(m_x, m_y, m_map.m_map1);
 
-
+    //右上角
     if(roundBelonged==MINE)
         painter.setBrush(Qt::blue);
     else painter.setBrush(Qt::red);
-    painter.drawRect(900,900,50,50);
+    painter.drawRect(1500, 100, 50, 50);
     painter.setBrush(Qt::NoBrush);
 
-    QFont font = painter.font();
-    font.setPixelSize(25);
-    painter.setFont(font);
 
     if(roundBelonged==MINE)
     {
         painter.setPen(Qt::blue);
-        painter.drawText(790,935, "蓝方回合");
+        QFont font("隶书",25,60,true);
+        painter.setFont(font);
+        painter.drawText(1290, 120, "蓝方回合");
+        painter.setFont(QFont("宋体",15,40,false));
+        painter.drawText(1295, 160, QString("可行棋子：%1/%2").arg(roundNum[roundBelonged]).arg(aliveNum[roundBelonged]));
     }
     else
     {
         painter.setPen(Qt::red);
-        painter.drawText(790,935, "红方回合");
+        painter.setFont(QFont("隶书",25,60,true));
+        painter.drawText(1290,120, "红方回合");
+        painter.setFont(QFont("宋体",15,40,false));
+        painter.drawText(1295, 160, QString("可行棋子：%1/%2").arg(roundNum[roundBelonged]).arg(aliveNum[roundBelonged]));
     }
-
+    painter.setPen(Qt::NoPen);
     // 方框标白
     painter.setPen(QPen(Qt::white,4));
     painter.drawRect((mouseCellx + m_x/CELL_SIZE - 1)*CELL_SIZE,
@@ -168,7 +228,7 @@ void MainDialog::paintEvent(QPaintEvent *)
             for(int j=1;j<=30;j++)
                 if(moveAl.resultMap[i][j]!=-1)
                 {
-                    painter.setPen(QPen(Qt::blue,2));
+                    painter.setPen(QPen(QColor(0,150,255),2,Qt::DotLine));
                     painter.drawRect((i + m_x/CELL_SIZE - 1)*CELL_SIZE,
                                      (j + m_y/CELL_SIZE - 1)*CELL_SIZE,
                                      CELL_SIZE, CELL_SIZE);
@@ -193,8 +253,6 @@ void MainDialog::paintEvent(QPaintEvent *)
                                  CELL_SIZE, CELL_SIZE);
                 painter.setPen(Qt::NoPen);
             }
-
-            //TODO: hint Nobody can be attracked
         }
     }
 }
@@ -253,6 +311,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
             nowCharacter->characterState=BEGIN;
             nowCharacter->selectionDlg->show();
             nowCharacter->selectionDlg->raise();
+            cancelButton->hide();
         }
         else return;
     }
@@ -269,6 +328,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
                     gameState=BEGIN;
                     nowCharacter->characterState=BEGIN;
                     nowCharacter->attrackedOrNot=true;
+                    cancelButton->hide();
                     break;
                 }
             }
@@ -281,27 +341,45 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         }
     }
 }
+void MainDialog::receiveHint(QString str)
+{
+    hint->setText(str);
+    if(hint->isHidden()==true)
+        hint->show();
+    QTimer::singleShot(1500,[=](){hint->hide();});
+}
 void MainDialog::characterMoveEvent(Character* t_nowCharacter)
 {
+    cancelButton->show();
     nowCharacter=t_nowCharacter;
     memset(moveAl.resultMap, -1, sizeof moveAl.resultMap);
     gameState=FINDPATH;
+    int tempx = nowCharacter->m_cellx;
+    int tempy = nowCharacter->m_celly;
     moveAl.setMove(nowCharacter->m_move, nowCharacter);
-    moveAl.findAvailableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
+    moveAl.findAvailableCell(tempx, tempy, 0,character,characterNum);
     for(int i=0;i<characterNum;i++)
         if(nowCharacter!=character[i])
         {
             moveAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=-1;
         }
+    if(moveAl.resultMap[tempx+1][tempy]==-1&&moveAl.resultMap[tempx-1][tempy]==-1
+            &&moveAl.resultMap[tempx][tempy+1]==-1&&moveAl.resultMap[tempx][tempy-1]==-1)
+    {
+        receiveHint("没有可移至的地块");
+        emit cancelButton->clicked();
+    }
     repaint();
 }
 void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
 {
+    cancelButton->show();
     nowCharacter=t_nowCharacter;
     memset(attrackAl.resultMap, -1, sizeof attrackAl.resultMap);
     gameState=FINDATTRACK;
     //attrackAl.setMove(nowCharacter->m_attrackable, nowCharacter);
    // attrackAl.findAttrackableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
+    bool findOneOrNot = false;
     //寻找可攻击目标并标出
     for(int i=0;i<characterNum;i++)
     {
@@ -310,12 +388,19 @@ void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
                 abs(character[i]->m_celly-nowCharacter->m_celly)<=nowCharacter->m_attrackable)
         {
             attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+            findOneOrNot = true;
         }
         if(character[i]->m_celly==nowCharacter->m_celly&&
                 abs(character[i]->m_cellx-nowCharacter->m_cellx)<=nowCharacter->m_attrackable)
         {
             attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+            findOneOrNot = true;
         }
+    }
+    if(findOneOrNot == false)
+    {
+        receiveHint("没有可攻击的对象");
+        emit cancelButton->clicked();
     }
     repaint();
 }
