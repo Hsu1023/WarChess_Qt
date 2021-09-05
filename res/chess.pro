@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     algorithm.cpp \
+    animation.cpp \
     character.cpp \
     characterlabel.cpp \
     main.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     algorithm.h \
+    animation.h \
     character.h \
     characterlabel.h \
     config.h \

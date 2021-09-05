@@ -28,7 +28,7 @@ protected:
     int mousex, mousey;
     int mouseCellx, mouseCelly;
     int mouseLocalCellx, mouseLocalCelly;
-    Character * character[10];
+    Character * character[10], *nowCharacter;
     int characterNum;
     int gameState;
 signals:

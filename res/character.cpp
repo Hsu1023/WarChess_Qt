@@ -9,12 +9,21 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
 {
     selectionDlg = new CharacterSelection(parent);
     selectionDlg->hide();
+
+    connect(this, &Character::infoChanged,[=](){
+        //按顺序，raise有次序
+        propertyDlg->updateData(m_hp,m_fullhp,m_move,m_fullmove,m_localCellx,m_localCelly);
+        selectionDlg->updateData(m_localCellx,m_localCelly);
+    });
+
     connect(selectionDlg->moveButton, &QPushButton::clicked,
             this, &Character::moveAction);
     connect(selectionDlg->attrackButton, &QPushButton::clicked,
             this, &Character::attrackAction);
     connect(selectionDlg->skipButton, &QPushButton::clicked,
             this, &Character::skipAction);
+    connect(this, &Character::beAttracked, this, &Character::attrackedEvent);
+
 }
 void Character::setLabel()
 {
@@ -26,32 +35,28 @@ Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, 
     m_hp =50; m_fullhp = 100;
     m_move = m_fullmove = 4;
     m_attrack = 40;
+    m_attrackable=1;
     name = "勇士";
     icon.load(WARRIOR_PATH);
     setFixedSize(64,64);
     setPixmap(icon);
 
     setMouseTracking(true);
+    //selectionDlg->setMouseTracking(true);
+    //propertyDlg->setMouseTracking(true);
     propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack, parent);
     propertyDlg->hide();
 
+    emit infoChanged();
 }
 
 void Character::enterEvent(QEvent *)
 {
     if(propertyDlg->isHidden()==true)
     {
-        int x = 0;
-        if((m_localCellx-1)*CELL_SIZE-165 >= 0)
-            x=(m_localCellx-1)*CELL_SIZE-165;
-        else
-            x=(m_localCellx-1)*CELL_SIZE+32;
-        //dlg->show();
-
         propertyDlg->show();
-        propertyDlg->updateData(m_hp, m_fullhp, m_move, m_fullmove, x, (m_localCelly-1)*CELL_SIZE);
+        propertyDlg->updateData(m_hp, m_fullhp, m_move, m_fullmove, m_localCellx, m_localCelly);
         propertyDlg->raise();
-
     }
 }
 void Character::leaveEvent(QEvent *)
@@ -62,17 +67,35 @@ void Character::leaveEvent(QEvent *)
 
 void Character::moveAction()
 {
-    //TODO：selectionDlg->hide();
+    if(selectionDlg->isHidden()==false)
+        selectionDlg->hide();
     characterState = FINDPATH;
     emit characterMoveAction(this);
+    //characterState = BEGIN;
 }
 void Character::attrackAction()
 {
-
     characterState = FINDATTRACK;
     emit characterAttrackAction(this);
+    //characterState = BEGIN;
 }
 void Character::skipAction()
 {
     characterState = END;
+    selectionDlg->hide();
+}
+void Character::attrackedEvent(int attrack)
+{
+    m_hp -= attrack;
+
+    QLabel *tempLabel= new QLabel(parentWidget());
+    tempLabel->setAttribute(Qt::WA_DeleteOnClose);
+    tempLabel->setStyleSheet("color:red; font:bold; font-size:20px;");
+    tempLabel->setText(QString("-%1").arg(attrack));
+    tempLabel->show();
+    tempLabel->raise();
+    tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
+    QTimer::singleShot(1000,[=](){delete tempLabel;});
+
+    emit infoChanged();
 }

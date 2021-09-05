@@ -11,10 +11,9 @@ public:
     CharacterProperty(QString, int, int, int, QWidget* parent = nullptr);
 public:
     QGridLayout layout;
-    QLabel nameLabel, hpLabel1, hpLabel2;
-    void updateData(int hp, int fullhp, int move, int fullmove, int localx, int localy);
+    QLabel nameLabel, hpLabel1, hpLabel2, moveLabel1, moveLabel2, attrackLabel1, attrackLabel2;
+    void updateData(int hp, int fullhp, int move, int fullmove, int localCellx, int localCelly);
 };
-
 class CharacterSelection: public QLabel
 {
     Q_OBJECT
@@ -23,6 +22,7 @@ public:
 public:
     QVBoxLayout *layout;
     QPushButton *moveButton, *attrackButton, *skipButton;
+    void updateData(int localCellx, int localCelly);
 };
 
 #endif // CHARACTERLABEL_H

@@ -13,7 +13,7 @@ MainDialog::MainDialog(QWidget *parent)
 
     characterNum = 2;
     character[0] = new Warrior(2, 2, m_x, m_y, this);
-    character[1] = new Warrior(5, 5, m_x, m_y, this);
+    character[1] = new Warrior(3, 2, m_x, m_y, this);
 
     connect(this, &MainDialog::moveScreen, this, &MainDialog::redrawCharacter);
     connect(this, &MainDialog::moveScreen, [=](){repaint();});
@@ -53,7 +53,6 @@ void MainDialog::paintEvent(QPaintEvent *)
                      CELL_SIZE, CELL_SIZE);
     painter.setPen(Qt::NoPen);
 
-
     // 加入血条
     for(int i=0;i<characterNum;i++)
     {
@@ -83,9 +82,11 @@ void MainDialog::paintEvent(QPaintEvent *)
 
     else if(gameState==FINDATTRACK)
     {
+        //寻找可攻击对象
         for(int i=0;i<characterNum;i++)
         {
-            if(character[i]->characterState!=BEGIN||character[i]->characterState!=END)continue;
+            if(character[i]->characterState!=BEGIN&&character[i]->characterState!=END)continue;
+            if(character[i]==nowCharacter)continue;
             //TODO: enemy continue
             if(attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]!=-1)
             {
@@ -108,11 +109,17 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         //选择对话框
         for(int i = 0; i <characterNum; i++)
         {
+            if(character[i]->characterState!=BEGIN)continue;
             if(mouseLocalCellx==character[i]->m_localCellx&&
                     mouseLocalCelly==character[i]->m_localCelly)
             {
-                character[i]->selectionDlg->show();
-                character[i]->selectionDlg->setGeometry((character[i]->m_localCellx-1)*CELL_SIZE+64,(character[i]->m_localCelly-1)*CELL_SIZE-10,80,80);
+                if(character[i]->characterState==END)continue;
+                if(character[i]->selectionDlg->isHidden())
+                {
+                    character[i]->selectionDlg->show();
+                    character[i]->selectionDlg->updateData(mouseCellx, mouseCelly);
+                    character[i]->selectionDlg->raise();
+                }
             }
             else
             {
@@ -126,22 +133,46 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         if(moveAl.resultMap[mouseCellx][mouseCelly]!=-1)
         {
             gameState=MOVING;
-
-            //TODO:Moving jianqu
+            nowCharacter->m_move-=moveAl.resultMap[mouseCellx][mouseCelly];
+            nowCharacter->m_cellx = mouseCellx;
+            nowCharacter->m_celly = mouseCelly;
+            nowCharacter->m_localCellx = mouseLocalCellx;
+            nowCharacter->m_localCelly = mouseLocalCelly;
+            nowCharacter->move((mouseCellx-1)*CELL_SIZE, (mouseCelly-1)*CELL_SIZE);
+            emit nowCharacter->infoChanged();
+            //TODO: Moving animation
+            gameState=BEGIN;
+            nowCharacter->characterState=BEGIN;
+            nowCharacter->selectionDlg->show();
+            nowCharacter->selectionDlg->raise();
         }
-        else gameState=BEGIN;
+        else return;
     }
     else if(gameState==FINDATTRACK)
     {
+        if(attrackAl.resultMap[mouseCellx][mouseCelly]!=-1)
+        {
+            for(int i=0;i<characterNum;i++)
+            {
+                if(character[i]->m_cellx==mouseCellx&&character[i]->m_celly==mouseCelly)
+                {
+                    emit character[i]->beAttracked(nowCharacter->m_attrack);
+                    gameState=BEGIN;
+                    nowCharacter->characterState=BEGIN;
+                    break;
+                }
+            }
+        }
             //TODO:
     }
 }
-void MainDialog::characterMoveEvent(Character* nowCharacter)
+void MainDialog::characterMoveEvent(Character* t_nowCharacter)
 {
+    nowCharacter=t_nowCharacter;
     memset(moveAl.resultMap, -1, sizeof moveAl.resultMap);
     gameState=FINDPATH;
-    moveAl.setMove(nowCharacter->m_move);
-    moveAl.findAvailableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0);
+    moveAl.setMove(nowCharacter->m_move, nowCharacter);
+    moveAl.findAvailableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
     for(int i=0;i<characterNum;i++)
         if(nowCharacter!=character[i])
         {
@@ -149,13 +180,29 @@ void MainDialog::characterMoveEvent(Character* nowCharacter)
         }
     repaint();
 }
-void MainDialog::characterAttrackEvent(Character* nowCharacter)
+void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
 {
+    nowCharacter=t_nowCharacter;
     memset(attrackAl.resultMap, -1, sizeof attrackAl.resultMap);
     gameState=FINDATTRACK;
-    attrackAl.setMove(nowCharacter->m_move);
-    attrackAl.findAvailableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0);
-
+    //attrackAl.setMove(nowCharacter->m_attrackable, nowCharacter);
+   // attrackAl.findAttrackableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
+    //寻找可攻击目标并标出
+    for(int i=0;i<characterNum;i++)
+    {
+        if(character[i]==nowCharacter)continue;//TODO enemy
+        if(character[i]->m_cellx==nowCharacter->m_cellx&&
+                abs(character[i]->m_celly-nowCharacter->m_celly)<=nowCharacter->m_attrackable)
+        {
+            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+        }
+        if(character[i]->m_celly==nowCharacter->m_celly&&
+                abs(character[i]->m_cellx-nowCharacter->m_cellx)<=nowCharacter->m_attrackable)
+        {
+            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+        }
+    }
+    qDebug()<<attrackAl.resultMap[2][2];
     repaint();
 }
 void MainDialog::mouseMoveEvent(QMouseEvent* event)
@@ -219,7 +266,10 @@ void MainDialog::setScreenMoveTimer()
             return ;
         }
         for(int i = 0; i < characterNum; i++)
+        {
             character[i]->m_localCellx--;
+            emit character[i]->infoChanged();
+        }
         m_x -= CELL_SIZE;
         emit moveScreen();
     });
@@ -237,7 +287,10 @@ void MainDialog::setScreenMoveTimer()
         }
 
         for(int i = 0; i < characterNum; i++)
+        {
             character[i]->m_localCellx++;
+            emit character[i]->infoChanged();
+        }
         m_x += CELL_SIZE;
         emit moveScreen();
     });
@@ -253,7 +306,10 @@ void MainDialog::setScreenMoveTimer()
             return ;
         }
         for(int i = 0; i < characterNum; i++)
+        {
             character[i]->m_localCelly--;
+            emit character[i]->infoChanged();
+        }
         m_y -= CELL_SIZE;
         emit moveScreen();
     });
@@ -270,7 +326,10 @@ void MainDialog::setScreenMoveTimer()
             return ;
         }
         for(int i = 0; i < characterNum; i++)
+        {
             character[i]->m_localCelly++;
+            emit character[i]->infoChanged();
+        }
         m_y += CELL_SIZE;
         emit moveScreen();
     });
