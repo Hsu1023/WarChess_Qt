@@ -4,6 +4,7 @@
 #include "config.h"
 #include "characterlabel.h"
 #include <QWidget>
+#include "animation.h"
 
 class Character: public QLabel
 {
@@ -23,11 +24,12 @@ public:
     QString name;
     int characterState;
     bool attrackedOrNot;// 攻击为1，未攻击为0
+    MoveAnimation *mover;
 public:
     void setLabel();
     void enterEvent(QEvent *)override;
     void leaveEvent(QEvent *)override;
-    void movePos(int mouseCellx, int mouseCelly, int mouseLocalCellx, int mouseLocalCelly, int steps);
+    void movePos(int mouseCellx, int mouseCelly, int mouseLocalCellx, int mouseLocalCelly, int steps, std::vector<int>path);
 public slots:
     void moveAction();
     void attrackAction();

@@ -11,7 +11,9 @@
         <file>pic/cancel_button.png</file>
         <file>pic/menu_button.png</file>
         <file>pic/skip_button.png</file>
-        <file>pic/music_button.png</file>
         <file>pic/hint.png</file>
+        <file>pic/music_button_off.png</file>
+        <file>pic/music_button_on.png</file>
+        <file>pic/warrior.gif</file>
     </qresource>
 </RCC>

@@ -8,6 +8,7 @@
 #include "clicklabel.h"
 #include "hintlabel.h"
 #include "ai.h"
+#include "animation.h"
 
 class MainDialog : public QDialog
 {
@@ -42,10 +43,13 @@ protected:
     int roundNum[2];
     bool roundBelonged;
     bool AIOpenOrNot;
+    bool screenMoveOrNot;
     ClickLabel *cancelButton, *skipButton, *menuButton, *musicButton;
     HintLabel *hint;
     GameAI *gameAI;
     QTimer *AItimer;
+    QSound *bgm;
+    MoveAnimation *ani;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();

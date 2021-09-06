@@ -7,9 +7,10 @@ MainDialog::MainDialog(QWidget *parent)
     : QDialog(parent)
 {
     m_x = 0; m_y = 0;
+
+    nowCharacter = nullptr;
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setMouseTracking(true);
-    setScreenMoveTimer();
 
     setButton();
     hint = new HintLabel(this);
@@ -19,11 +20,15 @@ MainDialog::MainDialog(QWidget *parent)
     gameAI = new GameAI;
     connect(gameAI, &GameAI::repaintScreen, [=](){repaint();});
 
+    setScreenMoveTimer();
+    screenMoveOrNot = true;
+
     characterNum = 4;
     character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
     character[1] = new Warrior(10, 15, m_x, m_y,MINE, this);
-    character[2] = new Warrior(15, 14, m_x, m_y,YOURS, this);
-    character[3] = new Warrior(3, 3, m_x, m_y, MINE, this);
+    character[3] = new Warrior(15, 14, m_x, m_y,YOURS, this);
+    character[2] = new Warrior(3, 3, m_x, m_y, MINE, this);
+
 
     aliveNum[MINE] = aliveNum[YOURS] = 0;
     for(int i=0;i<characterNum;i++)
@@ -54,11 +59,15 @@ MainDialog::MainDialog(QWidget *parent)
         connect(character[i],&Character::dieOneCharacter,this,&MainDialog::dieOneCharacterEvent);
         connect(character[i],&Character::submitHint, this, &MainDialog::receiveHint);
         connect(character[i],&Character::hideCancelButton, [=](){emit cancelButton->clicked();});
+        connect(character[i]->mover,&MoveAnimation::animationStarted,[=](){screenMoveOrNot = false;});
+        connect(character[i]->mover,&MoveAnimation::animationFinished,[=]()
+        {
+            screenMoveOrNot = true;
+            if(AIOpenOrNot == false || character[i]->m_belong == MINE)
+                character[i]->selectionDlg->show();
+        });
     }
-
-
     emit moveScreen();
-
 }
 MainDialog::~MainDialog()
 {
@@ -77,9 +86,12 @@ void MainDialog::setButton()
     skipButton->setStyleSheet("border:none;");
 
     musicButton = new ClickLabel(this);
-    musicButton->setPixmap(QPixmap(":/pic/music_button.png"));
+    musicButton->setPixmap(QPixmap(":/pic/music_button_on.png"));
     musicButton->setGeometry(1350,830,60,48);
     musicButton->setStyleSheet("border:none;");
+    bgm = new QSound(":/music/bgm.wav",this);
+    bgm->setLoops(QSound::Infinite);
+    //bgm->play();
 
     menuButton = new ClickLabel(this);
     menuButton->setPixmap(QPixmap(":/pic/menu_button.png"));
@@ -97,10 +109,21 @@ void MainDialog::setButton()
     });
     connect(skipButton, &ClickLabel::clicked, [=](){
         cancelButton->hide();
-        nowCharacter->selectionDlg->hide();
+        if(nowCharacter)nowCharacter->selectionDlg->hide();
         nextRound(roundBelonged);
     });
     connect(musicButton, &ClickLabel::clicked, [=](){
+        //std::vector<int>x; x.push_back(UP); x.push_back(DOWN); x.push_back(LEFT); x.push_back(RIGHT);ani->moveAlongPath(character[0],x);
+        if(bgm->isFinished()==true)
+        {
+            musicButton->setPixmap(QPixmap(":/pic/music_button_on.png"));
+            bgm->play();
+        }
+        else
+        {
+            musicButton->setPixmap(QPixmap(":/pic/music_button_off.png"));
+            bgm->stop();
+        }
         //TODO:
     });
     connect(menuButton, &ClickLabel::clicked, [=](){
@@ -208,8 +231,7 @@ void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
     if(findOneOrNot == false)
     {
         receiveHint("没有可攻击的对象");
-        Sleep(500);
-        emit cancelButton->clicked();
+        QTimer::singleShot(500,[=](){emit cancelButton->clicked();});
     }
 }
 void MainDialog::endOneCharacterEvent(Character* endedCharacter)
@@ -240,11 +262,12 @@ void MainDialog::dieOneCharacterEvent(Character* deadCharacter)
         }
     }
     aliveNum[character[id]->m_belong]--;
-    if(aliveNum[character[id]->m_belong])
+    if(aliveNum[character[id]->m_belong]==0)
     {
         if(character[id]->m_belong==MINE)emit myLoss();
         else emit myWin();
     }
+    repaint();
 }
 void MainDialog::paintEvent(QPaintEvent *)
 {
@@ -285,7 +308,7 @@ void MainDialog::paintEvent(QPaintEvent *)
                      (mouseCelly + m_y/CELL_SIZE - 1)*CELL_SIZE,
                      CELL_SIZE, CELL_SIZE);
     painter.setPen(Qt::NoPen);
-
+/*
     // 加入血条
     for(int i=0;i<characterNum;i++)
     {
@@ -303,7 +326,7 @@ void MainDialog::paintEvent(QPaintEvent *)
                          (character[i]->m_localCelly - 1) * CELL_SIZE - HP_DISTANCE, CELL_SIZE, HP_HEIGHT);
         painter.setPen(Qt::NoPen);
     }
-
+    */
     //寻路，把路标蓝
     if(gameState == FINDPATH)
     {
@@ -394,7 +417,9 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         //可行域
         if(moveAl.resultMap[mouseCellx][mouseCelly]!=-1)
         {
-            nowCharacter->movePos(mouseCellx, mouseCelly, mouseLocalCellx, mouseLocalCelly, moveAl.resultMap[mouseCellx][mouseCelly]);
+            moveAl.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, mouseCellx, mouseCelly, 0, moveAl.resultMap[mouseCellx][mouseCelly]);
+            //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
+            nowCharacter->movePos(mouseCellx, mouseCelly, mouseLocalCellx, mouseLocalCelly, moveAl.resultMap[mouseCellx][mouseCelly],moveAl.path);
             gameState=BEGIN;
             nowCharacter->characterState=BEGIN;
             nowCharacter->selectionDlg->show();
@@ -492,6 +517,7 @@ void MainDialog::setScreenMoveTimer()
     connect(this, SIGNAL(notMoveRight()),rtimer, SLOT(stop()));
     connect(rtimer, &QTimer::timeout, [this]()
     {
+        if(screenMoveOrNot == false)return;
         if(-m_x >= MAP_WIDTH - WINDOW_WIDTH)
         {
             emit notMoveRight();
@@ -511,6 +537,7 @@ void MainDialog::setScreenMoveTimer()
     connect(this, SIGNAL(notMoveLeft()),ltimer, SLOT(stop()));
     connect(ltimer, &QTimer::timeout, [this]()
     {
+        if(screenMoveOrNot == false)return;
         if(m_x >= 0)
         {
             emit notMoveLeft();
@@ -530,6 +557,7 @@ void MainDialog::setScreenMoveTimer()
     connect(this, SIGNAL(notMoveDown()),dtimer, SLOT(stop()));
     connect(dtimer, &QTimer::timeout, [this]()
     {
+        if(screenMoveOrNot == false)return;
         if(-m_y >= MAP_HEIGHT - WINDOW_HEIGHT)
         {
             emit notMoveDown();
@@ -549,6 +577,7 @@ void MainDialog::setScreenMoveTimer()
     connect(this, SIGNAL(notMoveUp()),utimer, SLOT(stop()));
     connect(utimer, &QTimer::timeout, [this]()
     {
+        if(screenMoveOrNot == false)return;
         if(m_y >= 0)
         {
             emit notMoveUp();

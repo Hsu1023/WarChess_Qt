@@ -18,7 +18,10 @@
 #include <windows.h>
 #include <QRgb>
 #include <QThread>
-
+#include <QSound>
+#include <QPropertyAnimation>
+#include <QSequentialAnimationGroup>
+#include <QMovie>
 // 主窗口参数
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 960
@@ -30,7 +33,8 @@
 #define CELL_SIZE 64
 
 //
-#define MOUSE_MOVE_TIMER_INTERVAL 100
+#define MOUSE_MOVE_TIMER_INTERVAL 200
+#define ANIMATION_DURATION 500
 
 #define HP_HEIGHT 8
 #define HP_DISTANCE 10
@@ -110,5 +114,6 @@ inline int ManhattanDist(int x1, int y1, int x2, int y2)
 }
 
 enum BELONGING{MINE,YOURS};
+enum DERECTION{UP,DOWN,LEFT,RIGHT};
 
 #endif // CONFIG_H

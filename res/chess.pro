@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     ai.cpp \
+    aicontroller.cpp \
     algorithm.cpp \
     animation.cpp \
     character.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 
 HEADERS += \
     ai.h \
+    aicontroller.h \
     algorithm.h \
     animation.h \
     character.h \
@@ -38,6 +40,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
+    music.qrc \
     pic.qrc
 
-DISTFILES +=
+DISTFILES += \
+    pic/warrior.gif

@@ -11,7 +11,7 @@ void GameAI::moveCharacter(int id, Character * character[], int characterNum)
     int tempx = nowCharacter->m_cellx;
     int tempy = nowCharacter->m_celly;
 
-    Al.findAvailableCell(tempx, tempy, 0,character, characterNum);
+    Al.findAvailableCell(tempx, tempy, 0, character, characterNum);
 
     int minDist = 0x3f3f3f3f;
     node minNode{-1,-1};
@@ -32,15 +32,15 @@ void GameAI::moveCharacter(int id, Character * character[], int characterNum)
         }
     }
 
+    Al.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, minNode.first, minNode.second, 0, Al.resultMap[minNode.first][minNode.second]);
+    //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
+
     int localCellx = nowCharacter->m_localCellx + minNode.first - nowCharacter->m_cellx;
     int localCelly = nowCharacter->m_localCelly + minNode.second - nowCharacter->m_celly;
-    nowCharacter->movePos(minNode.first, minNode.second, localCellx, localCelly, Al.resultMap[minNode.first][minNode.second]);
+    nowCharacter->movePos(minNode.first, minNode.second, localCellx, localCelly, Al.resultMap[minNode.first][minNode.second],Al.path);
 
     if(minDist > nowCharacter->m_attrackable)return;//无法攻击
     emit repaintScreen();
-    Sleep(500);
-    qDebug()<<minDist;
     emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
-
 }
 
