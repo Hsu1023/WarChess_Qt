@@ -11,7 +11,9 @@ public:
     Character * nowCharacter;
 public:
     void findAvailableCell(int x,int y,int depth, Character*[], int characterNum);
-    void setMove(int,Character *t_nowCharacter);
+    void init();
+    void init(int, Character *t_nowCharacter);
+    std::vector<node> v;
 };
 
 #endif // ALGORITHM_H

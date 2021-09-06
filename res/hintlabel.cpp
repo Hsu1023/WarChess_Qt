@@ -35,6 +35,5 @@ void HintLabel::paintEvent(QPaintEvent * ev)
     QString title(str);
     int widthOfTitle = painter.fontMetrics().width(title);//字符串显示的像素大小
     painter.drawText(this->width()/2-widthOfTitle/2,90,title);
-    qDebug()<<"1";
 }
 

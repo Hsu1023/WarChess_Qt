@@ -17,6 +17,7 @@
 #include <QVBoxLayout>
 #include <windows.h>
 #include <QRgb>
+#include <QThread>
 
 // 主窗口参数
 #define WINDOW_WIDTH 1600
@@ -90,8 +91,16 @@ const int binMap[51][31]=
     {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0} ,
     {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0} ,
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} ,
-
 };
-inline int min(int x,int y){return x<y?x:y;}
+inline int min(int x,int y){return x < y ? x : y;}
+inline int max(int x,int y){return x > y ? x : y;}
+
+typedef long long ll;
+typedef unsigned int uint;
+typedef unsigned long long ull;
+typedef std::pair<int,int> node;
+
+
+enum BELONGING{MINE,YOURS};
 
 #endif // CONFIG_H

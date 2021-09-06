@@ -14,25 +14,27 @@ MainDialog::MainDialog(QWidget *parent)
     setButton();
     hint = new HintLabel(this);
     hint->hide();
+    AItimer = new QTimer;
 
     characterNum = 4;
-    character[0] = new Warrior(10, 10, m_x, m_y, this);characterBelonged[0]=YOURS;
-    character[1] = new Warrior(10, 15, m_x, m_y, this);characterBelonged[1]=MINE;
-    character[2] = new Warrior(15, 14, m_x, m_y, this);characterBelonged[2]=YOURS;
-    character[3] = new Warrior(3, 3, m_x, m_y, this);characterBelonged[3]=MINE;
+    character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
+    character[1] = new Warrior(10, 15, m_x, m_y,MINE, this);
+    character[2] = new Warrior(15, 14, m_x, m_y,YOURS, this);
+    character[3] = new Warrior(3, 3, m_x, m_y, MINE, this);
 
     aliveNum[MINE] = aliveNum[YOURS] = 0;
     for(int i=0;i<characterNum;i++)
-        aliveNum[characterBelonged[i]]++;
+        aliveNum[character[i]->m_belong]++;
     roundBelonged=MINE;
     receiveHint("蓝方回合");
     roundNum[MINE]=aliveNum[MINE];
     roundNum[YOURS]=aliveNum[YOURS];
+    AIOpenOrNot = true;
 
-    connect(this, &MainDialog::moveScreen, this, &MainDialog::redrawCharacter);
     connect(this, &MainDialog::moveScreen, [=](){
         for(int i=0;i<characterNum;i++)
         {
+            redrawCharacter();
             if(character[i]->characterState!=Character::DEAD)
                 character[i]->updateInfo();
         }
@@ -50,6 +52,24 @@ MainDialog::MainDialog(QWidget *parent)
         connect(character[i],&Character::submitHint, this, &MainDialog::receiveHint);
         connect(character[i],&Character::hideCancelButton, [=](){emit cancelButton->clicked();});
     }
+
+    gameAI = new GameAI;
+    /*
+    connect(gameAI, &GameAI::repaintScreen, [=](){
+        for(int i=0;i<characterNum;i++)
+        {
+            redrawCharacter();
+            if(character[i]->characterState!=Character::DEAD)
+                character[i]->updateInfo();
+        }
+        repaint();
+    });
+    connect(gameAI, &GameAI::AIRoundFinished, [=](){
+        nextRound(YOURS);
+    });
+    connect(this, &MainDialog::turnToAIRound, gameAI, &GameAI::AIRound);
+    */
+
     emit moveScreen();
 
 }
@@ -114,10 +134,11 @@ void MainDialog::nextRound(int last)
     int next = last ^ 1;
     roundBelonged = next;
     gameState = BEGIN;
+    AItimer->stop();
     //更新下一回合character
     for(int i = 0; i < characterNum; i++)
     {
-        if(characterBelonged[i]==next&&character[i]->characterState!=Character::DEAD)
+        if(character[i]->m_belong==next&&character[i]->characterState!=Character::DEAD)
         {
             character[i]->characterState = Character::BEGIN;
             character[i]->attrackedOrNot = false;
@@ -127,6 +148,85 @@ void MainDialog::nextRound(int last)
     roundNum[next] = aliveNum[next];
     if(last==MINE)receiveHint("红方回合");
     else receiveHint("蓝方回合");
+    if(AIOpenOrNot == true && next == YOURS)
+    {
+        gameState = AI;
+        AIRound();
+    }
+    repaint();
+}
+int timercount = 0;
+void MainDialog::AIRound()
+{
+    AItimer->setInterval(1000);
+    AItimer->start();
+    connect(AItimer, &QTimer::timeout,[&](){
+        qDebug()<<"time";
+        for(;timercount<characterNum;timercount++)
+        {
+            if(character[timercount]->m_belong == YOURS && character[timercount]->characterState!=Character::DEAD)
+            {
+                gameAI->moveCharacter(timercount,character,characterNum);
+                repaint();
+                timercount++;
+                return;
+            }
+        }
+        if(timercount==characterNum)
+        {
+            timercount=0;
+            nextRound(YOURS);
+        }
+    });
+}
+void MainDialog::characterMoveEvent(Character* t_nowCharacter)
+{
+    gameState=FINDPATH;
+    cancelButton->show();
+    nowCharacter=t_nowCharacter;
+    int tempx = nowCharacter->m_cellx;
+    int tempy = nowCharacter->m_celly;
+    moveAl.init(nowCharacter->m_move, nowCharacter);
+    moveAl.findAvailableCell(tempx, tempy, 0,character,characterNum);
+    if(moveAl.resultMap[tempx+1][tempy]==-1&&moveAl.resultMap[tempx-1][tempy]==-1
+            &&moveAl.resultMap[tempx][tempy+1]==-1&&moveAl.resultMap[tempx][tempy-1]==-1)
+    {
+        receiveHint("没有可移至的地块");
+        emit cancelButton->clicked();
+    }
+    repaint();
+}
+void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
+{
+    gameState=FINDATTRACK;
+    cancelButton->show();
+    nowCharacter=t_nowCharacter;
+    //memset(attrackAl.resultMap, -1, sizeof attrackAl.resultMap);
+    attrackAl.init(nowCharacter->m_attrackable, nowCharacter);
+   // attrackAl.findAttrackableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
+    bool findOneOrNot = false;
+    //寻找可攻击目标并标出
+    for(int i=0;i<characterNum;i++)
+    {
+        if(character[i]->m_belong==roundBelonged)continue;//友军
+        if(character[i]->m_cellx==nowCharacter->m_cellx&&
+                abs(character[i]->m_celly-nowCharacter->m_celly)<=nowCharacter->m_attrackable)
+        {
+            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+            findOneOrNot = true;
+        }
+        if(character[i]->m_celly==nowCharacter->m_celly&&
+                abs(character[i]->m_cellx-nowCharacter->m_cellx)<=nowCharacter->m_attrackable)
+        {
+            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+            findOneOrNot = true;
+        }
+    }
+    if(findOneOrNot == false)
+    {
+        receiveHint("没有可攻击的对象");
+        emit cancelButton->clicked();
+    }
     repaint();
 }
 void MainDialog::endOneCharacterEvent(Character* endedCharacter)
@@ -140,11 +240,10 @@ void MainDialog::endOneCharacterEvent(Character* endedCharacter)
             break;
         }
     }
-    roundNum[characterBelonged[id]]--;
+    roundNum[character[id]->m_belong]--;
     cancelButton->hide();
-    qDebug()<<roundNum[characterBelonged[id]];
-    if(roundNum[characterBelonged[id]]==0)
-        nextRound(characterBelonged[id]);
+    if(roundNum[character[id]->m_belong]==0)
+        nextRound(character[id]->m_belong);
 }
 void MainDialog::dieOneCharacterEvent(Character* deadCharacter)
 {
@@ -157,10 +256,10 @@ void MainDialog::dieOneCharacterEvent(Character* deadCharacter)
             break;
         }
     }
-    aliveNum[characterBelonged[id]]--;
-    if(aliveNum[characterBelonged[id]])
+    aliveNum[character[id]->m_belong]--;
+    if(aliveNum[character[id]->m_belong])
     {
-        if(characterBelonged[id]==MINE)emit myLoss();
+        if(character[id]->m_belong==MINE)emit myLoss();
         else emit myWin();
     }
 }
@@ -209,7 +308,7 @@ void MainDialog::paintEvent(QPaintEvent *)
     {
         if(character[i]->characterState==Character::DEAD)continue;
 
-        if(characterBelonged[i]==YOURS)//敌人
+        if(character[i]->m_belong==YOURS)//敌人
             painter.setBrush(Qt::red);
         else
             painter.setBrush(Qt::blue);
@@ -221,6 +320,7 @@ void MainDialog::paintEvent(QPaintEvent *)
                          (character[i]->m_localCelly - 1) * CELL_SIZE - HP_DISTANCE, CELL_SIZE, HP_HEIGHT);
         painter.setPen(Qt::NoPen);
     }
+
     //寻路，把路标蓝
     if(gameState == FINDPATH)
     {
@@ -244,7 +344,7 @@ void MainDialog::paintEvent(QPaintEvent *)
         {
             //if(character[i]->characterState!=BEGIN&&character[i]->characterState!=Character::END)continue;
             if(character[i]->characterState==Character::DEAD)continue;
-            if(characterBelonged[i]==roundBelonged)continue;//友军
+            if(character[i]->m_belong==roundBelonged)continue;//友军
             if(attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]!=-1)
             {//找到可攻击对象标红
                 painter.setPen(QPen(Qt::red,2));
@@ -259,6 +359,9 @@ void MainDialog::paintEvent(QPaintEvent *)
 void MainDialog::mousePressEvent(QMouseEvent* event)
 {
     updateMousePosition(event);
+
+    if(gameState==AI)return;
+
     if(gameState==BEGIN)
     {
         //选择对话框
@@ -266,13 +369,13 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         {
             if(character[i]->characterState!=BEGIN)continue;
             //敌军
-            if(characterBelonged[i]!=roundBelonged)continue;
+            if(character[i]->m_belong!=roundBelonged)continue;
             else
             {   //点错收回选择框
                 if(character[i]->selectionDlg->isHidden()==false)
                     character[i]->selectionDlg->hide();
             }
-
+            //应该封装
             //点中了人物
             if(mouseLocalCellx==character[i]->m_localCellx&&
                     mouseLocalCelly==character[i]->m_localCelly)
@@ -299,19 +402,13 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         //可行域
         if(moveAl.resultMap[mouseCellx][mouseCelly]!=-1)
         {
-            nowCharacter->m_move-=moveAl.resultMap[mouseCellx][mouseCelly];
-            nowCharacter->m_cellx = mouseCellx;
-            nowCharacter->m_celly = mouseCelly;
-            nowCharacter->m_localCellx = mouseLocalCellx;
-            nowCharacter->m_localCelly = mouseLocalCelly;
-            nowCharacter->move((mouseLocalCellx-1)*CELL_SIZE, (mouseLocalCelly-1)*CELL_SIZE);
-            nowCharacter->updateInfo();
-            //TODO: Moving animation
+            nowCharacter->movePos(mouseCellx, mouseCelly, mouseLocalCellx, mouseLocalCelly, moveAl.resultMap[mouseCellx][mouseCelly]);
             gameState=BEGIN;
             nowCharacter->characterState=BEGIN;
             nowCharacter->selectionDlg->show();
             nowCharacter->selectionDlg->raise();
             cancelButton->hide();
+            repaint();
         }
         else return;
     }
@@ -321,7 +418,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         {
             for(int i=0;i<characterNum;i++)
             {
-                if(characterBelonged[i]==roundBelonged)continue;//友军
+                if(character[i]->m_belong==roundBelonged)continue;//友军
                 if(character[i]->m_cellx==mouseCellx&&character[i]->m_celly==mouseCelly)//点中
                 {
                     emit character[i]->beAttracked(nowCharacter->m_attrack);
@@ -339,6 +436,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
             nowCharacter->characterState=BEGIN;
             nowCharacter->attrackedOrNot=false;
         }
+        repaint();
     }
 }
 void MainDialog::receiveHint(QString str)
@@ -348,64 +446,9 @@ void MainDialog::receiveHint(QString str)
         hint->show();
     QTimer::singleShot(1500,[=](){hint->hide();});
 }
-void MainDialog::characterMoveEvent(Character* t_nowCharacter)
-{
-    cancelButton->show();
-    nowCharacter=t_nowCharacter;
-    memset(moveAl.resultMap, -1, sizeof moveAl.resultMap);
-    gameState=FINDPATH;
-    int tempx = nowCharacter->m_cellx;
-    int tempy = nowCharacter->m_celly;
-    moveAl.setMove(nowCharacter->m_move, nowCharacter);
-    moveAl.findAvailableCell(tempx, tempy, 0,character,characterNum);
-    for(int i=0;i<characterNum;i++)
-        if(nowCharacter!=character[i])
-        {
-            moveAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=-1;
-        }
-    if(moveAl.resultMap[tempx+1][tempy]==-1&&moveAl.resultMap[tempx-1][tempy]==-1
-            &&moveAl.resultMap[tempx][tempy+1]==-1&&moveAl.resultMap[tempx][tempy-1]==-1)
-    {
-        receiveHint("没有可移至的地块");
-        emit cancelButton->clicked();
-    }
-    repaint();
-}
-void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
-{
-    cancelButton->show();
-    nowCharacter=t_nowCharacter;
-    memset(attrackAl.resultMap, -1, sizeof attrackAl.resultMap);
-    gameState=FINDATTRACK;
-    //attrackAl.setMove(nowCharacter->m_attrackable, nowCharacter);
-   // attrackAl.findAttrackableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
-    bool findOneOrNot = false;
-    //寻找可攻击目标并标出
-    for(int i=0;i<characterNum;i++)
-    {
-        if(characterBelonged[i]==roundBelonged)continue;//友军
-        if(character[i]->m_cellx==nowCharacter->m_cellx&&
-                abs(character[i]->m_celly-nowCharacter->m_celly)<=nowCharacter->m_attrackable)
-        {
-            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
-            findOneOrNot = true;
-        }
-        if(character[i]->m_celly==nowCharacter->m_celly&&
-                abs(character[i]->m_cellx-nowCharacter->m_cellx)<=nowCharacter->m_attrackable)
-        {
-            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
-            findOneOrNot = true;
-        }
-    }
-    if(findOneOrNot == false)
-    {
-        receiveHint("没有可攻击的对象");
-        emit cancelButton->clicked();
-    }
-    repaint();
-}
 void MainDialog::mouseMoveEvent(QMouseEvent* event)
 {
+    //qDebug()<<"mousemoving";
     updateMousePosition(event);
     checkScreenMove();
     update();

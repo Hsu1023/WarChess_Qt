@@ -1,11 +1,12 @@
 #include "character.h"
 #include "algorithm.h"
 
-Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, QWidget* parent):
+Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny,bool belong, QWidget* parent):
     QLabel(parent),
-    m_cellx(t_cellx), m_celly(t_celly), characterState(BEGIN), attrackedOrNot(false),
+    m_cellx(t_cellx), m_celly(t_celly),
     m_localCellx(t_cellx - LocalScreenx / CELL_SIZE),
-    m_localCelly(t_celly - LocalScreeny / CELL_SIZE)
+    m_localCelly(t_celly - LocalScreeny / CELL_SIZE),
+    m_belong(belong),characterState(BEGIN), attrackedOrNot(false)
 {
     selectionDlg = new CharacterSelection(parent);
     selectionDlg->hide();
@@ -35,8 +36,8 @@ void Character::setLabel()
 {
 
 }
-Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, QWidget* parent):
-    Character( t_cellx, t_celly, LocalScreenx, LocalScreeny, parent)
+Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
+    Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
 {
     m_hp =50; m_fullhp = 100;
     m_move = m_fullmove = 4;
@@ -122,4 +123,15 @@ void Character::skipAction()
 void Character::updateInfo()
 {
     emit infoChanged();
+}
+void Character::movePos(int mouseCellx, int mouseCelly, int mouseLocalCellx, int mouseLocalCelly, int steps)
+{
+    m_move-=steps;
+    m_cellx = mouseCellx;
+    m_celly = mouseCelly;
+    m_localCellx = mouseLocalCellx;
+    m_localCelly = mouseLocalCelly;
+    move((mouseLocalCellx-1)*CELL_SIZE, (mouseLocalCelly-1)*CELL_SIZE);
+                //TODO: Moving animation
+    updateInfo();
 }
