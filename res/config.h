@@ -100,6 +100,14 @@ typedef unsigned int uint;
 typedef unsigned long long ull;
 typedef std::pair<int,int> node;
 
+inline int ManhattanDist(node x, node y)
+{
+    return abs(x.first - y.first) + abs(x.second - y.second);
+}
+inline int ManhattanDist(int x1, int y1, int x2, int y2)
+{
+    return abs(x1 - x2) + abs(y1 - y2);
+}
 
 enum BELONGING{MINE,YOURS};
 

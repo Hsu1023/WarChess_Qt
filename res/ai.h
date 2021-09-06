@@ -5,18 +5,17 @@
 #include "algorithm.h"
 #include "config.h"
 
-class GameAI: public QObject
+class GameAI : public QObject
 {
     Q_OBJECT
 public:
     FindPathAlgorithm Al;
 public:
-    GameAI(QObject *parent = nullptr);
+    GameAI();
     void AIRound(Character *character[], int characterNum);
     void moveCharacter(int id, Character * character[], int CharacterNum);
 signals:
     void repaintScreen();
-    void AIRoundFinished();
 };
 
 #endif // AI_H

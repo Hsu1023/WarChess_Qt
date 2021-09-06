@@ -14,7 +14,10 @@ MainDialog::MainDialog(QWidget *parent)
     setButton();
     hint = new HintLabel(this);
     hint->hide();
+
     AItimer = new QTimer;
+    gameAI = new GameAI;
+    connect(gameAI, &GameAI::repaintScreen, [=](){repaint();});
 
     characterNum = 4;
     character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
@@ -53,22 +56,6 @@ MainDialog::MainDialog(QWidget *parent)
         connect(character[i],&Character::hideCancelButton, [=](){emit cancelButton->clicked();});
     }
 
-    gameAI = new GameAI;
-    /*
-    connect(gameAI, &GameAI::repaintScreen, [=](){
-        for(int i=0;i<characterNum;i++)
-        {
-            redrawCharacter();
-            if(character[i]->characterState!=Character::DEAD)
-                character[i]->updateInfo();
-        }
-        repaint();
-    });
-    connect(gameAI, &GameAI::AIRoundFinished, [=](){
-        nextRound(YOURS);
-    });
-    connect(this, &MainDialog::turnToAIRound, gameAI, &GameAI::AIRound);
-    */
 
     emit moveScreen();
 
@@ -110,6 +97,7 @@ void MainDialog::setButton()
     });
     connect(skipButton, &ClickLabel::clicked, [=](){
         cancelButton->hide();
+        nowCharacter->selectionDlg->hide();
         nextRound(roundBelonged);
     });
     connect(musicButton, &ClickLabel::clicked, [=](){
@@ -201,33 +189,28 @@ void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
     gameState=FINDATTRACK;
     cancelButton->show();
     nowCharacter=t_nowCharacter;
-    //memset(attrackAl.resultMap, -1, sizeof attrackAl.resultMap);
     attrackAl.init(nowCharacter->m_attrackable, nowCharacter);
-   // attrackAl.findAttrackableCell(nowCharacter->m_cellx, nowCharacter->m_celly, 0,character,characterNum);
     bool findOneOrNot = false;
     //寻找可攻击目标并标出
     for(int i=0;i<characterNum;i++)
     {
-        if(character[i]->m_belong==roundBelonged)continue;//友军
-        if(character[i]->m_cellx==nowCharacter->m_cellx&&
-                abs(character[i]->m_celly-nowCharacter->m_celly)<=nowCharacter->m_attrackable)
+        if(character[i]->m_belong==roundBelonged||character[i]->characterState==Character::DEAD)continue;//友军
+        if(ManhattanDist(character[i]->m_cellx, character[i]->m_celly,
+                         nowCharacter->m_cellx, nowCharacter->m_celly)<=nowCharacter->m_attrackable)
         {
-            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
+            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly] = 1;
+            attrackAl.v.push_back(node(character[i]->m_cellx, character[i]->m_celly));
             findOneOrNot = true;
-        }
-        if(character[i]->m_celly==nowCharacter->m_celly&&
-                abs(character[i]->m_cellx-nowCharacter->m_cellx)<=nowCharacter->m_attrackable)
-        {
-            attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]=1;
-            findOneOrNot = true;
+            qDebug()<<i<<character[i]->m_cellx<<character[i]->m_celly;
         }
     }
+    repaint();
     if(findOneOrNot == false)
     {
         receiveHint("没有可攻击的对象");
+        Sleep(500);
         emit cancelButton->clicked();
     }
-    repaint();
 }
 void MainDialog::endOneCharacterEvent(Character* endedCharacter)
 {
@@ -334,25 +317,34 @@ void MainDialog::paintEvent(QPaintEvent *)
                                      CELL_SIZE, CELL_SIZE);
                     painter.setPen(Qt::NoPen);
                 }
-        //TODO: hint there's no way
     }
 
     else if(gameState==FINDATTRACK)
     {
         //寻找可攻击对象
-        for(int i=0;i<characterNum;i++)
+        for(ull i = 0; i < attrackAl.v.size(); i++)
         {
-            //if(character[i]->characterState!=BEGIN&&character[i]->characterState!=Character::END)continue;
-            if(character[i]->characterState==Character::DEAD)continue;
-            if(character[i]->m_belong==roundBelonged)continue;//友军
-            if(attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly]!=-1)
-            {//找到可攻击对象标红
-                painter.setPen(QPen(Qt::red,2));
-                painter.drawRect((character[i]->m_cellx + m_x/CELL_SIZE - 1)*CELL_SIZE,
-                                 (character[i]->m_celly + m_y/CELL_SIZE - 1)*CELL_SIZE,
-                                 CELL_SIZE, CELL_SIZE);
-                painter.setPen(Qt::NoPen);
-            }
+            painter.setPen(QPen(Qt::red,3));
+            painter.setBrush(QBrush(Qt::red));
+            painter.drawRect((attrackAl.v[i].first + m_x/CELL_SIZE - 1)*CELL_SIZE,
+                             (attrackAl.v[i].second + m_y/CELL_SIZE - 1)*CELL_SIZE,
+                             CELL_SIZE, CELL_SIZE);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(Qt::NoBrush);
+        }
+        for(int i = nowCharacter->m_localCellx -nowCharacter->m_attrackable;
+                i <= nowCharacter->m_localCellx +nowCharacter->m_attrackable; i++)
+            for(int j = nowCharacter->m_localCelly -nowCharacter->m_attrackable;
+                    j <= nowCharacter->m_localCelly +nowCharacter->m_attrackable; j++)
+        {
+            if(i<=1||i>=50)continue;
+            if(j<=1||j>=30)continue;
+            if(ManhattanDist(i,j,nowCharacter->m_localCellx,nowCharacter->m_localCelly)>nowCharacter->m_attrackable)continue;
+            painter.setPen(QPen(QColor(255,150,0),2,Qt::DotLine));
+            painter.drawRect((i-1)*CELL_SIZE,
+                             (j-1)*CELL_SIZE,
+                             CELL_SIZE, CELL_SIZE);
+            painter.setPen(Qt::NoPen);
         }
     }
 }
@@ -448,7 +440,6 @@ void MainDialog::receiveHint(QString str)
 }
 void MainDialog::mouseMoveEvent(QMouseEvent* event)
 {
-    //qDebug()<<"mousemoving";
     updateMousePosition(event);
     checkScreenMove();
     update();

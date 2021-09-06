@@ -1,12 +1,7 @@
 #include "ai.h"
 
-GameAI::GameAI(QObject * parent):
-    QObject(parent)
+GameAI::GameAI()
 {
-}
-inline int ManhattanDist(node x, node y)
-{
-    return abs(x.first - y.first) + abs(x.second - y.second);
 }
 void GameAI::moveCharacter(int id, Character * character[], int characterNum)
 {
@@ -20,6 +15,7 @@ void GameAI::moveCharacter(int id, Character * character[], int characterNum)
 
     int minDist = 0x3f3f3f3f;
     node minNode{-1,-1};
+    int attrackid = -1;
     for(ull i = 0; i < Al.v.size(); i++)
     {
         for(int j = 0; j < characterNum; j++)
@@ -30,19 +26,21 @@ void GameAI::moveCharacter(int id, Character * character[], int characterNum)
             {
                 minNode = Al.v[i];
                 minDist = tempDist;
+                attrackid = j;
                 qDebug()<<"you";
             }
         }
     }
 
-    //Sleep(1000);
     int localCellx = nowCharacter->m_localCellx + minNode.first - nowCharacter->m_cellx;
     int localCelly = nowCharacter->m_localCelly + minNode.second - nowCharacter->m_celly;
-    nowCharacter->movePos(minNode.first,minNode.second,localCellx,localCelly,Al.resultMap[minNode.first][minNode.second]);
+    nowCharacter->movePos(minNode.first, minNode.second, localCellx, localCelly, Al.resultMap[minNode.first][minNode.second]);
 
     if(minDist > nowCharacter->m_attrackable)return;//无法攻击
-
+    emit repaintScreen();
+    Sleep(500);
     qDebug()<<minDist;
+    emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
 
 }
 
