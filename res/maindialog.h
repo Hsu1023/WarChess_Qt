@@ -7,7 +7,7 @@
 #include "algorithm.h"
 #include "clicklabel.h"
 #include "hintlabel.h"
-#include "ai.h"
+#include "aicontroller.h"
 #include "animation.h"
 
 class MainDialog : public QDialog
@@ -46,8 +46,7 @@ protected:
     bool screenMoveOrNot;
     ClickLabel *cancelButton, *skipButton, *menuButton, *musicButton;
     HintLabel *hint;
-    GameAI *gameAI;
-    QTimer *AItimer;
+    AIController *aiController;
     QSound *bgm;
     MoveAnimation *ani;
 signals:

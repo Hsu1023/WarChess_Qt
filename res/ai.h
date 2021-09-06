@@ -15,7 +15,8 @@ public:
     void AIRound(Character *character[], int characterNum);
     void moveCharacter(int id, Character * character[], int CharacterNum);
 signals:
-    void repaintScreen();
+    //void repaintScreen();
+    void thisCharacterFinished();
 };
 
 #endif // AI_H

@@ -3,19 +3,25 @@
 
 #include <QObject>
 #include "config.h"
+#include "character.h"
+#include "ai.h"
 
 class AIController : public QTimer
 {
     Q_OBJECT
 public:
     int count;
-    int maxCount;
+    int characterNum;
+    Character ** character;
+    GameAI *gameAI;
 public:
-    AIController(int t_maxCountQWidget, QWidget* parent = nullptr );
+    AIController(Character *t_character[], int t_characterNum, QWidget* parent = nullptr);
     void reset();
     void start();
+    void loop();
 signals:
-    void AIFinished();
+    void AIRoundFinished();
+    //void repaintScreen();
 };
 
 #endif // AICONTROLLER_H

@@ -110,16 +110,18 @@ void Character::attrackedEvent(int attrack)
     tempLabel->setAttribute(Qt::WA_DeleteOnClose);
     tempLabel->setStyleSheet("color:red; font:bold; font-size:20px;");
     tempLabel->setText(QString("-%1").arg(attrack));
-    tempLabel->show();
-    tempLabel->raise();
-    tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
-    QTimer::singleShot(1000,[=](){delete tempLabel;});
+    QTimer::singleShot(500,[=](){
+        tempLabel->show();
+        tempLabel->raise();
+        tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
+        if(m_hp<=0)
+        {
+            characterState=DEAD;
+            emit dieOneCharacter(this);//TODO:slot
+        }
+    });
+    QTimer::singleShot(1000,[=](){tempLabel->close();});
 
-    if(m_hp<=0)
-    {
-        characterState=DEAD;
-        emit dieOneCharacter(this);//TODO:slot
-    }
     emit infoChanged();
 }
 void Character::skipAction()
@@ -132,10 +134,10 @@ void Character::updateInfo()
 {
     emit infoChanged();
 }
-void Character::movePos(int mouseCellx, int mouseCelly, int mouseLocalCellx, int mouseLocalCelly, int steps, std::vector<int>path)
+void Character::movePos(int steps, std::vector<int>path)
 {
     selectionDlg->hide();
-    m_move-=steps;
+    m_move -= steps;
     //m_cellx = mouseCellx;
     //m_celly = mouseCelly;
     //m_localCellx = mouseLocalCellx;

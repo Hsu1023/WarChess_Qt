@@ -16,9 +16,6 @@ MainDialog::MainDialog(QWidget *parent)
     hint = new HintLabel(this);
     hint->hide();
 
-    AItimer = new QTimer;
-    gameAI = new GameAI;
-    connect(gameAI, &GameAI::repaintScreen, [=](){repaint();});
 
     setScreenMoveTimer();
     screenMoveOrNot = true;
@@ -37,7 +34,6 @@ MainDialog::MainDialog(QWidget *parent)
     receiveHint("蓝方回合");
     roundNum[MINE]=aliveNum[MINE];
     roundNum[YOURS]=aliveNum[YOURS];
-    AIOpenOrNot = true;
 
     connect(this, &MainDialog::moveScreen, [=](){
         for(int i=0;i<characterNum;i++)
@@ -62,11 +58,18 @@ MainDialog::MainDialog(QWidget *parent)
         connect(character[i]->mover,&MoveAnimation::animationStarted,[=](){screenMoveOrNot = false;});
         connect(character[i]->mover,&MoveAnimation::animationFinished,[=]()
         {
+            emit nowCharacter->infoChanged();
             screenMoveOrNot = true;
             if(AIOpenOrNot == false || character[i]->m_belong == MINE)
                 character[i]->selectionDlg->show();
         });
     }
+
+    AIOpenOrNot = true;
+    aiController = new AIController(character, characterNum);
+    //connect(aiController, &AIController::repaintScreen, [=](){repaint();});
+    connect(aiController, &AIController::AIRoundFinished, [=](){nextRound(YOURS);});
+
     emit moveScreen();
 }
 MainDialog::~MainDialog()
@@ -145,7 +148,6 @@ void MainDialog::nextRound(int last)
     int next = last ^ 1;
     roundBelonged = next;
     gameState = BEGIN;
-    AItimer->stop();
     //更新下一回合character
     for(int i = 0; i < characterNum; i++)
     {
@@ -166,29 +168,10 @@ void MainDialog::nextRound(int last)
     }
     repaint();
 }
-int timercount = 0;
 void MainDialog::AIRound()
 {
-    AItimer->setInterval(1000);
-    AItimer->start();
-    connect(AItimer, &QTimer::timeout,[&](){
-        qDebug()<<"time";
-        for(;timercount<characterNum;timercount++)
-        {
-            if(character[timercount]->m_belong == YOURS && character[timercount]->characterState!=Character::DEAD)
-            {
-                gameAI->moveCharacter(timercount,character,characterNum);
-                repaint();
-                timercount++;
-                return;
-            }
-        }
-        if(timercount==characterNum)
-        {
-            timercount=0;
-            nextRound(YOURS);
-        }
-    });
+    aiController->reset();
+    aiController->start();
 }
 void MainDialog::characterMoveEvent(Character* t_nowCharacter)
 {
@@ -224,7 +207,7 @@ void MainDialog::characterAttrackEvent(Character* t_nowCharacter)
             attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly] = 1;
             attrackAl.v.push_back(node(character[i]->m_cellx, character[i]->m_celly));
             findOneOrNot = true;
-            qDebug()<<i<<character[i]->m_cellx<<character[i]->m_celly;
+            //qDebug()<<i<<character[i]->m_cellx<<character[i]->m_celly;
         }
     }
     repaint();
@@ -261,7 +244,11 @@ void MainDialog::dieOneCharacterEvent(Character* deadCharacter)
             break;
         }
     }
-    aliveNum[character[id]->m_belong]--;
+    int alive = 0;
+    for(int i = 0; i < characterNum; i++)
+        if(character[i]->m_belong == deadCharacter->m_belong&&id!=i)
+            alive++;
+    aliveNum[character[id]->m_belong] = alive;
     if(aliveNum[character[id]->m_belong]==0)
     {
         if(character[id]->m_belong==MINE)emit myLoss();
@@ -419,12 +406,11 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         {
             moveAl.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, mouseCellx, mouseCelly, 0, moveAl.resultMap[mouseCellx][mouseCelly]);
             //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
-            nowCharacter->movePos(mouseCellx, mouseCelly, mouseLocalCellx, mouseLocalCelly, moveAl.resultMap[mouseCellx][mouseCelly],moveAl.path);
+            nowCharacter->movePos(moveAl.resultMap[mouseCellx][mouseCelly],moveAl.path);
             gameState=BEGIN;
-            nowCharacter->characterState=BEGIN;
-            nowCharacter->selectionDlg->show();
-            nowCharacter->selectionDlg->raise();
             cancelButton->hide();
+            nowCharacter->characterState=BEGIN;
+            //connect()
             repaint();
         }
         else return;

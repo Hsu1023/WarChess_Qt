@@ -29,7 +29,7 @@ public:
     void setLabel();
     void enterEvent(QEvent *)override;
     void leaveEvent(QEvent *)override;
-    void movePos(int mouseCellx, int mouseCelly, int mouseLocalCellx, int mouseLocalCelly, int steps, std::vector<int>path);
+    void movePos(int steps, std::vector<int>path);
 public slots:
     void moveAction();
     void attrackAction();

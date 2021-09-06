@@ -53,7 +53,7 @@ void MoveAnimation::moveAlongPath(QWidget* object, std::vector<int>& path)
             moveOneCell(object, duration, path[i]);
         });
     }
-    QTimer::singleShot((path.size() - 1)*1.5*duration,[=](){
+    QTimer::singleShot((path.size())*1.5*duration,[=](){
         emit animationFinished();
     });
 }
