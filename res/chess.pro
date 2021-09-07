@@ -16,10 +16,12 @@ SOURCES += \
     character.cpp \
     characterlabel.cpp \
     gamelabel.cpp \
+    gamescene.cpp \
     main.cpp \
-    maindialog.cpp \
+    mainscene.cpp \
     map.cpp \
-    playingmenu.cpp
+    playingmenu.cpp \
+    selectionscene.cpp
 
 HEADERS += \
     ai.h \
@@ -30,9 +32,11 @@ HEADERS += \
     characterlabel.h \
     config.h \
     gamelabel.h \
-    maindialog.h \
+    gamescene.h \
+    mainscene.h \
     map.h \
-    playingmenu.h
+    playingmenu.h \
+    selectionscene.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

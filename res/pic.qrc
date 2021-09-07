@@ -18,5 +18,12 @@
         <file>pic/back_to_game.png</file>
         <file>pic/exit_game.png</file>
         <file>pic/restart.png</file>
+        <file>pic/background.png</file>
+        <file>pic/begin_button.png</file>
+        <file>pic/selection_background.png</file>
+        <file>pic/chapter1_button.png</file>
+        <file>pic/chapter2_button.png</file>
+        <file>pic/chaptermore_button.png</file>
+        <file>pic/chapterreturn_button.png</file>
     </qresource>
 </RCC>

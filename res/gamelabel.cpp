@@ -6,7 +6,6 @@ HintLabel::HintLabel( QWidget * parent, int x, int y):
 {
     setPixmap(QPixmap(":/pic/hint.png"));
     setGeometry(x,y,width(),height());
-
 }
 HintLabel::HintLabel(QString t_str,QWidget * parent, int x, int y):
     QLabel(parent), str(t_str)
@@ -36,13 +35,39 @@ void HintLabel::paintEvent(QPaintEvent * ev)
     painter.drawText(this->width()/2-widthOfTitle/2,90,title);
 }
 
-ClickLabel::ClickLabel(QWidget *parent) : QLabel(parent)
+ClickLabel::ClickLabel(int w, int h, QPixmap map, QWidget *parent,int t_style) : QLabel(parent)
 {
+    setFixedSize(w, h);
+    pic = map;
+    enterOrNot = false;
+    style = t_style;
 }
 void ClickLabel::mousePressEvent(QMouseEvent *event)
 {
     emit clicked();
     QLabel::mousePressEvent(event);
 }
+void ClickLabel::enterEvent(QEvent *)
+{
+    enterOrNot = true;
+    repaint();
+}
+void ClickLabel::leaveEvent(QEvent *)
+{
+    enterOrNot = false;
+    repaint();
+}
+void ClickLabel::paintEvent(QPaintEvent *eve)
+{
+    QLabel::paintEvent(eve);
 
+    QPainter painter(this);
+    if(style == TRANSPARENT)
+    {
+        if(enterOrNot)
+            painter.setOpacity(0.6);
+    }
+    painter.drawPixmap(0, 0, pic);
+
+}
 

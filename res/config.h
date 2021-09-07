@@ -33,8 +33,8 @@
 #define CELL_SIZE 64
 
 //
-#define MOUSE_MOVE_TIMER_INTERVAL 200
-#define ANIMATION_DURATION 300
+#define MOUSE_MOVE_TIMER_INTERVAL 150
+#define ANIMATION_DURATION 200
 #define ZOOM_DURATION 300
 
 #define HP_HEIGHT 8
@@ -42,6 +42,12 @@
 
 #define MAP_PATH  "://pic/map1.png"
 #define WARRIOR_PATH ":/pic/warrior_0.png"
+
+#define BGM_PATH ":/music/bgm.wav"
+#define ATTRACK_MUSIC_PATH ":/music/attrack.wav"
+#define CLICK_MUSIC_PATH ":/music/click.wav"
+
+
 
 const int binMap[51][31]=
 {

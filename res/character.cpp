@@ -18,8 +18,6 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
 
     layout = new QVBoxLayout(this);
 
-
-
     selectionDlg = new CharacterSelection(parent);
     selectionDlg->hide();
 
@@ -113,25 +111,28 @@ void Character::attrackAction()
 }
 void Character::attrackedEvent(int attrack)
 {
-    m_hp -= attrack;
+    double d = (rand()%20-40)/100 + 1;
+    attrack = int(1.0 * d *attrack);
 
+    m_hp -= attrack;
     //扣血
     QLabel *tempLabel= new QLabel(parentWidget());
     tempLabel->setAttribute(Qt::WA_DeleteOnClose);
-    tempLabel->setStyleSheet("color:red; font:bold; font-size:20px;");
+    tempLabel->setStyleSheet("color:rgb(255,40,0,0.8); font:bold; font-size:20px;");
     tempLabel->setText(QString("-%1").arg(attrack));
-
-
-        tempLabel->show();
-        tempLabel->raise();
-        tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4,
-                               (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
-        if(m_hp<=0)
-        {
-            characterState=DEAD;
-            hide();
-            emit dieOneCharacter(this);//TODO:slot
-        }
+    tempLabel->show();
+    tempLabel->raise();
+    QPropertyAnimation* animation = new QPropertyAnimation(tempLabel,"geometry");
+    animation->setDuration(500);
+    animation->setStartValue(QRect((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-30, tempLabel->width(),tempLabel->height()));
+    animation->setEndValue(QRect((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-30 -30,tempLabel->width(),tempLabel->height()));
+    animation->start();
+    if(m_hp<=0)
+    {
+       characterState=DEAD;
+       hide();
+       emit dieOneCharacter(this);//TODO:slot
+    }
     QTimer::singleShot(500,[=](){tempLabel->close();});
 
     emit infoChanged();

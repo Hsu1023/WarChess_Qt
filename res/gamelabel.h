@@ -5,6 +5,7 @@
 
 class HintLabel: public QLabel
 {
+    Q_OBJECT
 public:
     HintLabel( QWidget* parent = nullptr,int x=550, int y=70);
     HintLabel(QString t_str, QWidget* parent = nullptr,int x=550, int y=70);
@@ -18,8 +19,16 @@ class ClickLabel : public QLabel
 {
     Q_OBJECT
 public:
-    explicit ClickLabel(QWidget *parent = nullptr);
+    enum STYLE{NOSTYLE, TRANSPARENTSTYLE};
+public:
+    QPixmap pic;
+    bool enterOrNot;
+    int style;
+    explicit ClickLabel(int w, int h, QPixmap map , QWidget *parent = nullptr, int style = NOSTYLE);
     void mousePressEvent(QMouseEvent *event)override;
+    void enterEvent(QEvent*)override;
+    void leaveEvent(QEvent*)override;
+    void paintEvent(QPaintEvent*)override;
 signals:
     void clicked();
 };
