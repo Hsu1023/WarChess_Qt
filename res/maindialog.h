@@ -46,9 +46,10 @@ protected:
     ClickLabel *cancelButton, *skipButton, *menuButton, *musicButton;
     HintLabel *hint;
     AIController *aiController;
-    QSound *bgm;
+    QSound *bgm, *attrackSound, *clickSound;
     MoveAnimation *ani;
     PlayingMenu *playingMenu;
+    ResultMenu *resultMenu;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();
@@ -56,6 +57,7 @@ signals:
     void moveDown(); void notMoveDown();
     void moveScreen();
     void myLoss(); void myWin();
+    void restart(); void exit();
 public slots:
     void redrawCharacter();
     void characterMoveEvent(Character*);

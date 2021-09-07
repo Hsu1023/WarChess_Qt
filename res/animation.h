@@ -36,4 +36,5 @@ signals:
     void animationStarted();
 };
 
+void zoom(QWidget*);
 #endif // ANIMATION_H

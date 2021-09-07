@@ -36,11 +36,9 @@ void GameAI::moveCharacter(int id, Character * t_character[], int characterNum)
     }
     Al.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, minNode.first, minNode.second, 0, Al.resultMap[minNode.first][minNode.second]);
 
-    //qDebug()<<"connect"<<nowCharacter;
     connect(nowCharacter->mover, &MoveAnimation::animationFinished, this, &GameAI::attrackCharacter,Qt::UniqueConnection);
 
     nowCharacter->movePos(Al.resultMap[minNode.first][minNode.second],Al.path);
-//
 }
 void GameAI::attrackCharacter()
 {
@@ -53,14 +51,10 @@ void GameAI::attrackCharacter()
     else
     {
         emit thisCharacterFinished();
-
     }
-    //qDebug()<<"disconnect"<<nowCharacter;
-    //nowCharacter->mover->disconnect(this);
 }
 void GameAI::waitFunc()
 {
     emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
     emit thisCharacterFinished();qDebug()<<"emit";
-    //nowCharacter->attracker->disconnect(this);
 }

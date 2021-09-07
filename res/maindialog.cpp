@@ -6,21 +6,30 @@
 MainDialog::MainDialog(QWidget *parent)
     : QDialog(parent)
 {
-
     m_x = 0; m_y = 0;
 
     nowCharacter = nullptr;
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setMouseTracking(true);
 
+    playingMenu = new PlayingMenu(this);
+    playingMenu->hide();
+    connect(playingMenu, &PlayingMenu::exitGame, [=](){emit exit();});
+    connect(playingMenu, &PlayingMenu::restartGame, [=](){emit restart();});
 
     setButton();
     hint = new HintLabel(this);
     hint->hide();
 
-
     setScreenMoveTimer();
     screenMoveOrNot = true;
+
+
+    bgm = new QSound(":/music/bgm.wav",this);
+    bgm->setLoops(QSound::Infinite);
+    attrackSound = new QSound(":/music/attrack.wav", this);
+    clickSound = new QSound(":/music/click.wav", this);
+
 
     characterNum = 3;
     character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
@@ -65,6 +74,11 @@ MainDialog::MainDialog(QWidget *parent)
             if(AIOpenOrNot == false || character[i]->m_belong == MINE)
                 character[i]->selectionDlg->show();
         });
+        connect(character[i]->attracker,&AttrackAnimation::animationStarted,[=]()
+        {
+            screenMoveOrNot = false;
+            attrackSound->play();
+        });
         connect(character[i]->attracker,&AttrackAnimation::animationFinished,[=]()
         {
             //emit nowCharacter->infoChanged();
@@ -78,6 +92,15 @@ MainDialog::MainDialog(QWidget *parent)
     aiController = new AIController(character, characterNum);
     connect(aiController, &AIController::AIRoundBegin, [=](){skipButton->hide();});
     connect(aiController, &AIController::AIRoundFinished, [=](){skipButton->show();nextRound(YOURS);});
+
+    connect(this, &MainDialog::myWin, [=](){
+        resultMenu = new ResultMenu(1, AIOpenOrNot, this);
+        resultMenu->show();
+    });
+    connect(this, &MainDialog::myLoss, [=](){
+        resultMenu = new ResultMenu(0, AIOpenOrNot, this);
+        resultMenu->show();
+    });
 
     emit moveScreen();
 }
@@ -101,18 +124,17 @@ void MainDialog::setButton()
     musicButton->setPixmap(QPixmap(":/pic/music_button_on.png"));
     musicButton->setGeometry(1350,830,60,48);
     musicButton->setStyleSheet("border:none;");
-    bgm = new QSound(":/music/bgm.wav",this);
-    bgm->setLoops(QSound::Infinite);
     //bgm->play();
 
-    playingMenu = new PlayingMenu(this);
-    playingMenu->hide();
+
     menuButton = new ClickLabel(this);
     menuButton->setPixmap(QPixmap(":/pic/menu_button.png"));
     menuButton->setGeometry(1450,830,60,48);
     menuButton->setStyleSheet("border:none;");
 
     connect(cancelButton, &ClickLabel::clicked, [=](){
+       zoom(cancelButton);
+       clickSound->play();
        if(nowCharacter->characterState == Character::DEAD)return;
        nowCharacter->characterState = Character::BEGIN;
        //TODO : bug - selectionDlg无法显示
@@ -123,12 +145,17 @@ void MainDialog::setButton()
        repaint();
     });
     connect(skipButton, &ClickLabel::clicked, [=](){
+        zoom(skipButton);
+        clickSound->play();
+        //attrackSound->play();
         cancelButton->hide();
         if(nowCharacter)nowCharacter->selectionDlg->hide();
         nextRound(roundBelonged);
     });
     connect(musicButton, &ClickLabel::clicked, [=](){
-        //std::vector<int>x; x.push_back(UP); x.push_back(DOWN); x.push_back(LEFT); x.push_back(RIGHT);ani->moveAlongPath(character[0],x);
+        //emit myLoss();
+        zoom(musicButton);
+        clickSound->play();
         if(bgm->isFinished()==true)
         {
             musicButton->setPixmap(QPixmap(":/pic/music_button_on.png"));
@@ -142,6 +169,8 @@ void MainDialog::setButton()
         //TODO:
     });
     connect(menuButton, &ClickLabel::clicked, [=](){
+        zoom(menuButton);
+        clickSound->play();
         playingMenu->show();
         playingMenu->raise();
     });
@@ -265,6 +294,7 @@ void MainDialog::dieOneCharacterEvent(Character* deadCharacter)
     aliveNum[character[id]->m_belong] = alive;
     if(aliveNum[character[id]->m_belong]==0)
     {
+        hint->hide();
         if(character[id]->m_belong==MINE)emit myLoss();
         else emit myWin();
     }
@@ -381,6 +411,8 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
             {
                 if(character[i]->characterState==Character::END||
                         character[i]->characterState==Character::DEAD)continue;
+
+                clickSound->play();
                 //显示选择框
                 if(character[i]->selectionDlg->isHidden())
                 {
@@ -401,6 +433,8 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
         //可行域
         if(moveAl.resultMap[mouseCellx][mouseCelly]!=-1)
         {
+
+            clickSound->play();
             moveAl.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, mouseCellx, mouseCelly, 0, moveAl.resultMap[mouseCellx][mouseCelly]);
             //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
             nowCharacter->movePos(moveAl.resultMap[mouseCellx][mouseCelly],moveAl.path);
@@ -421,6 +455,7 @@ void MainDialog::mousePressEvent(QMouseEvent* event)
                 if(character[i]->m_belong==roundBelonged ||//友军
                     nowCharacter->characterState == Character::DEAD)//死了
                 {
+                    clickSound->play();
                     gameState=BEGIN;
                     nowCharacter->characterState=BEGIN;
                     nowCharacter->attrackedOrNot=false;

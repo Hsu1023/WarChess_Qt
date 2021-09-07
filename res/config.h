@@ -34,7 +34,8 @@
 
 //
 #define MOUSE_MOVE_TIMER_INTERVAL 200
-#define ANIMATION_DURATION 500
+#define ANIMATION_DURATION 300
+#define ZOOM_DURATION 300
 
 #define HP_HEIGHT 8
 #define HP_DISTANCE 10
@@ -119,5 +120,7 @@ enum DERECTION{UP,DOWN,LEFT,RIGHT};
 
 #define endtag (qDebug()<<"end")
 #define begintag (qDebug()<<"begin")
+
+
 
 #endif // CONFIG_H

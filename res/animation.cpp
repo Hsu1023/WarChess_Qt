@@ -86,7 +86,29 @@ void AttrackAnimation::startMove(QWidget *object, int begincellx, int begincelly
     group->addAnimation(animation2);
 
     group->start();
+
     QTimer::singleShot(duration * 2, [=](){
         emit animationFinished();
     });
+}
+
+
+void zoom(QWidget* widget)
+{
+    int x = widget->x();
+    int y = widget->y();
+    QSequentialAnimationGroup *group = new QSequentialAnimationGroup;
+    QPropertyAnimation* animation = new QPropertyAnimation(widget,"geometry");
+    animation->setDuration(ZOOM_DURATION);
+    animation->setStartValue(QRect(x, y, widget->width(),widget->height()));
+    animation->setEndValue(QRect(x, y + 10,widget->width(),widget->height()));
+    animation->setEasingCurve(QEasingCurve::OutBounce);
+    group->addAnimation(animation);
+    animation->setEndValue(QRect(x, y, widget->width(),widget->height()));
+    animation->setStartValue(QRect(x, y + 10, widget->width(),widget->height()));
+    group->addAnimation(animation);
+    group->start();
+    //QTimer::singleShot(ZOOM_DURATION * 2, [=](){widget->setGeometry(x, y, widget->width(), widget->height());});
+
+    QTimer::singleShot(ZOOM_DURATION*2, [](){Sleep(100);});
 }
