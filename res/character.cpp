@@ -9,6 +9,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
     m_belong(belong),characterState(BEGIN), attrackedOrNot(false)
 {
     mover = new MoveAnimation;
+    attracker = new AttrackAnimation;
     connect(mover, &MoveAnimation::widgetDown, [=](){m_celly++; m_localCelly++;});
     connect(mover, &MoveAnimation::widgetUp, [=](){m_celly--; m_localCelly--;});
     connect(mover, &MoveAnimation::widgetRight, [=](){m_cellx++; m_localCellx++;});
@@ -45,14 +46,13 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
 
     setFixedSize(64,64);
 
-    setMouseTracking(true);
+    //setMouseTracking(true);
 
     //repaint();
 
 }
 void Character::setLabel()
 {
-
 }
 Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
     Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
@@ -73,6 +73,7 @@ Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, 
 
 void Character::enterEvent(QEvent *)
 {
+    //emit repaintScreen();
     if(propertyDlg->isHidden()==true)
     {
         propertyDlg->show();
@@ -85,6 +86,7 @@ void Character::enterEvent(QEvent *)
 }
 void Character::leaveEvent(QEvent *)
 {
+    //emit repaintScreen();
     if(propertyDlg->isHidden()==false)
         propertyDlg->hide();
 }
@@ -119,7 +121,7 @@ void Character::attrackedEvent(int attrack)
     tempLabel->setStyleSheet("color:red; font:bold; font-size:20px;");
     tempLabel->setText(QString("-%1").arg(attrack));
 
-    QTimer::singleShot(500,[=](){
+
         tempLabel->show();
         tempLabel->raise();
         tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4,
@@ -127,10 +129,10 @@ void Character::attrackedEvent(int attrack)
         if(m_hp<=0)
         {
             characterState=DEAD;
+            hide();
             emit dieOneCharacter(this);//TODO:slot
         }
-    });
-    QTimer::singleShot(1000,[=](){tempLabel->close();});
+    QTimer::singleShot(500,[=](){tempLabel->close();});
 
     emit infoChanged();
 }

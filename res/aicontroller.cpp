@@ -6,38 +6,34 @@ AIController::AIController(Character *t_character[], int t_characterNum, QWidget
     character = t_character;
     gameAI = new GameAI;
 }
-void AIController::reset()
+void AIController::reset(int t_aicount)
 {
     count = -1;
-    qDebug()<<"reset";
+    aicount = t_aicount;
+    usedAI = 0;
 }
 void AIController::start()
 {
+    emit AIRoundBegin();
     //connect(gameAI, &GameAI::repaintScreen, [=](){emit repaintScreen();});
-    connect(gameAI, &GameAI::thisCharacterFinished, [=](){loop();});
+    connect(gameAI, &GameAI::thisCharacterFinished, this, &AIController::loop, Qt::UniqueConnection);
     loop();
 }
 void AIController::loop()
 {
     count++;
-    if(count == characterNum)
+    if(aicount == usedAI)
     {
         emit AIRoundFinished();
         return;
     }
-    //qDebug()<<count;
     for(;count < characterNum; count++)
     {
-        //qDebug()<<count;
         if(character[count]->m_belong == YOURS&&character[count]->characterState!=Character::DEAD)
         {
+            usedAI++;
             gameAI->moveCharacter(count, character, characterNum);
             return;
         }
-    }
-    if(count == characterNum)
-    {
-        emit AIRoundFinished();
-        return;
     }
 }

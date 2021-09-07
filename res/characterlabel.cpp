@@ -84,7 +84,7 @@ void HPLabel::reset(int t_hp, int t_totalhp, bool t_belong)
     m_totalhp = t_totalhp;
     m_belong = t_belong;
 }
-void HPLabel::paintEvent(QPaintEvent *eve)
+void HPLabel::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     if(m_belong==YOURS)//敌人

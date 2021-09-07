@@ -11,16 +11,17 @@ class AIController : public QTimer
     Q_OBJECT
 public:
     int count;
-    int characterNum;
+    int characterNum, aicount, usedAI;
     Character ** character;
     GameAI *gameAI;
 public:
     AIController(Character *t_character[], int t_characterNum, QWidget* parent = nullptr);
-    void reset();
+    void reset(int aicount);
     void start();
     void loop();
 signals:
     void AIRoundFinished();
+    void AIRoundBegin();
     //void repaintScreen();
 };
 

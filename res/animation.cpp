@@ -7,7 +7,7 @@ MoveAnimation::MoveAnimation(QWidget *parent):QWidget(parent)//上0 下1 左2 �
 }
 
 
-void MoveAnimation::moveOneCell(QWidget* object, int duration, int direction)
+void MoveAnimation::moveOneCell(QWidget* object, int direction, int duration)
 {
     /*
     for(int i=1;i<=64;i++)
@@ -50,11 +50,43 @@ void MoveAnimation::moveAlongPath(QWidget* object, std::vector<int>& path)
         else direction = UP;
         */
         QTimer::singleShot(i * (1.5 * duration), [=](){
-            moveOneCell(object, duration, path[i]);
+            moveOneCell(object, path[i], duration);
         });
     }
     QTimer::singleShot((path.size())*1.5*duration,[=](){
         emit animationFinished();
     });
 }
+AttrackAnimation::AttrackAnimation(QWidget *parent):
+    QWidget(parent)
+{
 
+}
+
+void AttrackAnimation::startMove(QWidget *object, int begincellx, int begincelly, int endcellx, int endcelly, int duration)
+{
+
+    emit animationStarted();
+    int beginx = (begincellx - 1)*CELL_SIZE;
+    int beginy = (begincelly - 1)*CELL_SIZE;
+    int endx = (endcellx - 1)*CELL_SIZE;
+    int endy = (endcelly - 1)*CELL_SIZE;
+
+    QSequentialAnimationGroup *group = new QSequentialAnimationGroup;
+    QPropertyAnimation *animation1 = new QPropertyAnimation(object,"geometry");
+    animation1->setStartValue(QRect(beginx, beginy, 64, 64));
+    animation1->setEndValue(QRect(endx, endy, 64, 64));
+    animation1->setDuration(duration);
+    group->addAnimation(animation1);
+
+    QPropertyAnimation *animation2 = new QPropertyAnimation(object,"geometry");
+    animation2->setEndValue(QRect(beginx, beginy, 64, 64));
+    animation2->setStartValue(QRect(endx, endy, 64, 64));
+    animation2->setDuration(duration);
+    group->addAnimation(animation2);
+
+    group->start();
+    QTimer::singleShot(duration * 2, [=](){
+        emit animationFinished();
+    });
+}

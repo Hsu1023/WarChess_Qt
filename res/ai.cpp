@@ -3,9 +3,10 @@
 GameAI::GameAI()
 {
 }
-void GameAI::moveCharacter(int id, Character * character[], int characterNum)
+void GameAI::moveCharacter(int id, Character * t_character[], int characterNum)
 {
-    Character *nowCharacter = character[id];
+    character = t_character;
+    nowCharacter = character[id];
     Al.init(nowCharacter->m_move, nowCharacter);
 
     int tempx = nowCharacter->m_cellx;
@@ -13,34 +14,53 @@ void GameAI::moveCharacter(int id, Character * character[], int characterNum)
 
     Al.findAvailableCell(tempx, tempy, 0, character, characterNum);
 
-    int minDist = 0x3f3f3f3f;
+    minDist = 0x3f3f3f3f;
     node minNode{-1,-1};
-    int attrackid = -1;
+    attrackid = -1;
+
+
     for(ull i = 0; i < Al.v.size(); i++)
     {
         for(int j = 0; j < characterNum; j++)
             if(character[j]->m_belong == MINE&&character[j]->characterState!=Character::DEAD)
         {
+            //if(character[1]->characterState==Character::DEAD)qDebug()<<"DEAD";else qDebug()<<"EXISTING";
             int tempDist = ManhattanDist(Al.v[i], std::make_pair(character[j]->m_cellx, character[j]->m_celly));
             if(minDist > tempDist)
             {
                 minNode = Al.v[i];
                 minDist = tempDist;
                 attrackid = j;
-                //qDebug()<<"you";
             }
         }
     }
     Al.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, minNode.first, minNode.second, 0, Al.resultMap[minNode.first][minNode.second]);
-    //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
+
+    //qDebug()<<"connect"<<nowCharacter;
+    connect(nowCharacter->mover, &MoveAnimation::animationFinished, this, &GameAI::attrackCharacter,Qt::UniqueConnection);
 
     nowCharacter->movePos(Al.resultMap[minNode.first][minNode.second],Al.path);
-
-    connect(nowCharacter->mover, &MoveAnimation::animationFinished, [=](){
-
-        if(minDist <= nowCharacter->m_attrackable)
-            emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
-        emit thisCharacterFinished();
-    });
+//
 }
+void GameAI::attrackCharacter()
+{
+    if(minDist <= nowCharacter->m_attrackable)
+    {
+        nowCharacter->attracker->startMove(nowCharacter, nowCharacter->m_localCellx, nowCharacter->m_localCelly,
+                             character[attrackid]->m_localCellx, character[attrackid]->m_localCelly);
+        connect(nowCharacter->attracker, &AttrackAnimation::animationFinished,this, &GameAI::waitFunc,Qt::UniqueConnection);
+    }
+    else
+    {
+        emit thisCharacterFinished();
 
+    }
+    //qDebug()<<"disconnect"<<nowCharacter;
+    //nowCharacter->mover->disconnect(this);
+}
+void GameAI::waitFunc()
+{
+    emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
+    emit thisCharacterFinished();qDebug()<<"emit";
+    //nowCharacter->attracker->disconnect(this);
+}

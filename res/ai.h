@@ -11,9 +11,14 @@ class GameAI : public QObject
 public:
     FindPathAlgorithm Al;
 public:
+    int attrackid, minDist;
+    Character * nowCharacter;
+    Character ** character;
     GameAI();
     void AIRound(Character *character[], int characterNum);
-    void moveCharacter(int id, Character * character[], int CharacterNum);
+    void moveCharacter(int id, Character * t_character[], int CharacterNum);
+    void attrackCharacter();
+    void waitFunc();
 signals:
     //void repaintScreen();
     void thisCharacterFinished();

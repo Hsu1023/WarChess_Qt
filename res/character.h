@@ -25,6 +25,7 @@ public:
     int characterState;
     bool attrackedOrNot;// 攻击为1，未攻击为0
     MoveAnimation *mover;
+    AttrackAnimation *attracker;
     QVBoxLayout *layout;
     HPLabel *hpLabel;
 public:
