@@ -1,5 +1,5 @@
-#ifndef HINTLABEL_H
-#define HINTLABEL_H
+#ifndef GAMELABEL_H
+#define GAMELABEL_H
 
 #include <QLabel>
 
@@ -14,4 +14,14 @@ public:
     void setText(QString);
 };
 
-#endif // HINTLABEL_H
+class ClickLabel : public QLabel
+{
+    Q_OBJECT
+public:
+    explicit ClickLabel(QWidget *parent = nullptr);
+    void mousePressEvent(QMouseEvent *event)override;
+signals:
+    void clicked();
+};
+
+#endif // GAMELABEL_H

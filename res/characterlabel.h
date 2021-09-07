@@ -26,4 +26,17 @@ public:
     void updateData(int localCellx, int localCelly);
 };
 
+class Character;
+class HPLabel: public QLabel
+{
+    Q_OBJECT
+public:
+    Character *belong;
+    HPLabel(int hp, int totalhp, bool belong, QWidget* parent = nullptr);
+public:
+    int m_hp, m_totalhp, m_belong;
+    void reset(int hp, int totalhp, bool belong);
+    void paintEvent(QPaintEvent*)override;
+};
+
 #endif // CHARACTERLABEL_H

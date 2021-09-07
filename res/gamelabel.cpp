@@ -1,4 +1,4 @@
-#include "hintlabel.h"
+#include "gamelabel.h"
 #include "config.h"
 
 HintLabel::HintLabel( QWidget * parent, int x, int y):
@@ -35,4 +35,14 @@ void HintLabel::paintEvent(QPaintEvent * ev)
     int widthOfTitle = painter.fontMetrics().width(title);//字符串显示的像素大小
     painter.drawText(this->width()/2-widthOfTitle/2,90,title);
 }
+
+ClickLabel::ClickLabel(QWidget *parent) : QLabel(parent)
+{
+}
+void ClickLabel::mousePressEvent(QMouseEvent *event)
+{
+    emit clicked();
+    QLabel::mousePressEvent(event);
+}
+
 

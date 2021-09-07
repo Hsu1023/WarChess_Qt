@@ -15,8 +15,7 @@ SOURCES += \
     animation.cpp \
     character.cpp \
     characterlabel.cpp \
-    clicklabel.cpp \
-    hintlabel.cpp \
+    gamelabel.cpp \
     main.cpp \
     maindialog.cpp \
     map.cpp \
@@ -29,9 +28,8 @@ HEADERS += \
     animation.h \
     character.h \
     characterlabel.h \
-    clicklabel.h \
     config.h \
-    hintlabel.h \
+    gamelabel.h \
     maindialog.h \
     map.h \
     playingmenu.h

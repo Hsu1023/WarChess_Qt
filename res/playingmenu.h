@@ -1,7 +1,7 @@
 #ifndef PLAYINGMENU_H
 #define PLAYINGMENU_H
 
-#include "clicklabel.h"
+#include "gamelabel.h"
 #include <QWidget>
 #include <QPushButton>
 

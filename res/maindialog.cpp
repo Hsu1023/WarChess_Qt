@@ -1,6 +1,6 @@
 #include "maindialog.h"
 #include "character.h"
-#include "hintlabel.h"
+#include "gamelabel.h"
 #include "algorithm.h"
 //TODO: cancelButton大一点易看见变化
 MainDialog::MainDialog(QWidget *parent)
@@ -28,7 +28,7 @@ MainDialog::MainDialog(QWidget *parent)
     character[3] = new Warrior(15, 14, m_x, m_y,YOURS, this);
     character[2] = new Warrior(3, 3, m_x, m_y, MINE, this);
 
-
+//begintag;
     aliveNum[MINE] = aliveNum[YOURS] = 0;
     for(int i=0;i<characterNum;i++)
         aliveNum[character[i]->m_belong]++;
@@ -275,7 +275,6 @@ void MainDialog::paintEvent(QPaintEvent *)
     painter.drawRect(1500, 100, 50, 50);
     painter.setBrush(Qt::NoBrush);
 
-
     if(roundBelonged==MINE)
     {
         painter.setPen(Qt::blue);
@@ -285,7 +284,7 @@ void MainDialog::paintEvent(QPaintEvent *)
         painter.setFont(QFont("宋体",15,40,false));
         painter.drawText(1295, 160, QString("可行棋子：%1/%2").arg(roundNum[roundBelonged]).arg(aliveNum[roundBelonged]));
     }
-    else
+    else if(AIOpenOrNot == false)
     {
         painter.setPen(Qt::red);
         painter.setFont(QFont("隶书",25,60,true));

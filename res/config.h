@@ -116,4 +116,8 @@ inline int ManhattanDist(int x1, int y1, int x2, int y2)
 enum BELONGING{MINE,YOURS};
 enum DERECTION{UP,DOWN,LEFT,RIGHT};
 
+
+#define endtag (qDebug()<<"end")
+#define begintag (qDebug()<<"begin")
+
 #endif // CONFIG_H

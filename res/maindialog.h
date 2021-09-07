@@ -5,8 +5,7 @@
 #include "character.h"
 #include "config.h"
 #include "algorithm.h"
-#include "clicklabel.h"
-#include "hintlabel.h"
+#include "gamelabel.h"
 #include "aicontroller.h"
 #include "animation.h"
 #include "playingmenu.h"
@@ -16,7 +15,6 @@ class MainDialog : public QDialog
     Q_OBJECT
 public:
     FindPathAlgorithm moveAl, attrackAl;
-    static int xxxx;
 public:
     enum GAMESTATE{BEGIN,FINDPATH,FINDATTRACK,AI};
     MainDialog(QWidget *parent = nullptr);

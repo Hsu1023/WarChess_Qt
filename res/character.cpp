@@ -14,7 +14,10 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
     connect(mover, &MoveAnimation::widgetRight, [=](){m_cellx++; m_localCellx++;});
     connect(mover, &MoveAnimation::widgetLeft, [=](){m_cellx--; m_localCellx--;});
     connect(mover, &MoveAnimation::animationFinished, [=](){emit infoChanged();});
-    //connect(mover, &MoveAnimation::animationFinished, [=](){if(belong==MINE)});
+
+    layout = new QVBoxLayout(this);
+
+
 
     selectionDlg = new CharacterSelection(parent);
     selectionDlg->hide();
@@ -29,6 +32,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
         }
         propertyDlg->updateData(m_hp,m_fullhp,m_move,m_fullmove,m_localCellx,m_localCelly);
         selectionDlg->updateData(m_localCellx,m_localCelly);
+        hpLabel->reset(m_hp, m_fullhp, belong);
     });
 
     connect(selectionDlg->moveButton, &QPushButton::clicked,
@@ -38,7 +42,12 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
     connect(selectionDlg->skipButton, &QPushButton::clicked,
             this, &Character::skipAction);
     connect(this, &Character::beAttracked, this, &Character::attrackedEvent);
-    repaint();
+
+    setFixedSize(64,64);
+
+    setMouseTracking(true);
+
+    //repaint();
 
 }
 void Character::setLabel()
@@ -54,14 +63,12 @@ Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, 
     m_attrackable=1;
     name = "勇士";
     icon.load(WARRIOR_PATH);
-    setFixedSize(64,64);
     setPixmap(icon);
-
-    setMouseTracking(true);
+//begintag;
+    hpLabel = new HPLabel(m_hp, m_fullhp, m_belong, this);
+//endtag;
     propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack,m_attrackable, parent);
     propertyDlg->hide();
-
-    emit infoChanged();
 }
 
 void Character::enterEvent(QEvent *)
@@ -111,10 +118,12 @@ void Character::attrackedEvent(int attrack)
     tempLabel->setAttribute(Qt::WA_DeleteOnClose);
     tempLabel->setStyleSheet("color:red; font:bold; font-size:20px;");
     tempLabel->setText(QString("-%1").arg(attrack));
+
     QTimer::singleShot(500,[=](){
         tempLabel->show();
         tempLabel->raise();
-        tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
+        tempLabel->setGeometry((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4,
+                               (m_localCelly-1)*CELL_SIZE-40,CELL_SIZE/2,40);
         if(m_hp<=0)
         {
             characterState=DEAD;

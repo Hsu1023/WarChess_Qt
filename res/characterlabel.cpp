@@ -71,3 +71,29 @@ void CharacterSelection::updateData(int localCellx, int localCelly)
         raise();
     }
 }
+
+HPLabel::HPLabel(int hp, int totalhp, bool belong,QWidget *parent):
+    QLabel(parent), m_hp(hp), m_totalhp(totalhp), m_belong(belong)
+{
+
+}
+
+void HPLabel::reset(int t_hp, int t_totalhp, bool t_belong)
+{
+    m_hp = t_hp;
+    m_totalhp = t_totalhp;
+    m_belong = t_belong;
+}
+void HPLabel::paintEvent(QPaintEvent *eve)
+{
+    QPainter painter(this);
+    if(m_belong==YOURS)//敌人
+        painter.setBrush(Qt::red);
+    else
+        painter.setBrush(Qt::blue);
+    painter.drawRect(5,0, (1.0 * m_hp / m_totalhp)*CELL_SIZE-10, HP_HEIGHT);
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(Qt::black);
+    painter.drawRect(5,0, CELL_SIZE-10, HP_HEIGHT);
+    painter.setPen(Qt::NoPen);
+}
