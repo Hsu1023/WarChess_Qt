@@ -9,6 +9,7 @@
 #include "hintlabel.h"
 #include "aicontroller.h"
 #include "animation.h"
+#include "playingmenu.h"
 
 class MainDialog : public QDialog
 {
@@ -49,6 +50,7 @@ protected:
     AIController *aiController;
     QSound *bgm;
     MoveAnimation *ani;
+    PlayingMenu *playingMenu;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();

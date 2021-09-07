@@ -6,11 +6,13 @@
 MainDialog::MainDialog(QWidget *parent)
     : QDialog(parent)
 {
+
     m_x = 0; m_y = 0;
 
     nowCharacter = nullptr;
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setMouseTracking(true);
+
 
     setButton();
     hint = new HintLabel(this);
@@ -58,7 +60,7 @@ MainDialog::MainDialog(QWidget *parent)
         connect(character[i]->mover,&MoveAnimation::animationStarted,[=](){screenMoveOrNot = false;});
         connect(character[i]->mover,&MoveAnimation::animationFinished,[=]()
         {
-            emit nowCharacter->infoChanged();
+            //emit nowCharacter->infoChanged();
             screenMoveOrNot = true;
             if(AIOpenOrNot == false || character[i]->m_belong == MINE)
                 character[i]->selectionDlg->show();
@@ -96,6 +98,8 @@ void MainDialog::setButton()
     bgm->setLoops(QSound::Infinite);
     //bgm->play();
 
+    playingMenu = new PlayingMenu(this);
+    playingMenu->hide();
     menuButton = new ClickLabel(this);
     menuButton->setPixmap(QPixmap(":/pic/menu_button.png"));
     menuButton->setGeometry(1450,830,60,48);
@@ -130,7 +134,8 @@ void MainDialog::setButton()
         //TODO:
     });
     connect(menuButton, &ClickLabel::clicked, [=](){
-        //TODO:
+        playingMenu->show();
+        playingMenu->raise();
     });
 }
 void MainDialog::redrawCharacter()

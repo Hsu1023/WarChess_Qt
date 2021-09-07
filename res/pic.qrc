@@ -15,5 +15,8 @@
         <file>pic/music_button_off.png</file>
         <file>pic/music_button_on.png</file>
         <file>pic/warrior.gif</file>
+        <file>pic/back_to_game.png</file>
+        <file>pic/exit_game.png</file>
+        <file>pic/restart.png</file>
     </qresource>
 </RCC>

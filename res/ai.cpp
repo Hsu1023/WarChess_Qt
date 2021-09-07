@@ -31,15 +31,13 @@ void GameAI::moveCharacter(int id, Character * character[], int characterNum)
             }
         }
     }
-
     Al.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, minNode.first, minNode.second, 0, Al.resultMap[minNode.first][minNode.second]);
     //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
 
     nowCharacter->movePos(Al.resultMap[minNode.first][minNode.second],Al.path);
 
-    //emit repaintScreen();
-
     connect(nowCharacter->mover, &MoveAnimation::animationFinished, [=](){
+
         if(minDist <= nowCharacter->m_attrackable)
             emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
         emit thisCharacterFinished();

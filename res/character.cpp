@@ -13,6 +13,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
     connect(mover, &MoveAnimation::widgetUp, [=](){m_celly--; m_localCelly--;});
     connect(mover, &MoveAnimation::widgetRight, [=](){m_cellx++; m_localCellx++;});
     connect(mover, &MoveAnimation::widgetLeft, [=](){m_cellx--; m_localCellx--;});
+    connect(mover, &MoveAnimation::animationFinished, [=](){emit infoChanged();});
     //connect(mover, &MoveAnimation::animationFinished, [=](){if(belong==MINE)});
 
     selectionDlg = new CharacterSelection(parent);

@@ -20,10 +20,15 @@ void AIController::start()
 void AIController::loop()
 {
     count++;
+    if(count == characterNum)
+    {
+        emit AIRoundFinished();
+        return;
+    }
     //qDebug()<<count;
     for(;count < characterNum; count++)
     {
-        qDebug()<<count;
+        //qDebug()<<count;
         if(character[count]->m_belong == YOURS&&character[count]->characterState!=Character::DEAD)
         {
             gameAI->moveCharacter(count, character, characterNum);
@@ -32,7 +37,7 @@ void AIController::loop()
     }
     if(count == characterNum)
     {
-        emit AIRoundFinished();qDebug()<<count;
+        emit AIRoundFinished();
         return;
     }
 }

@@ -19,7 +19,8 @@ SOURCES += \
     hintlabel.cpp \
     main.cpp \
     maindialog.cpp \
-    map.cpp
+    map.cpp \
+    playingmenu.cpp
 
 HEADERS += \
     ai.h \
@@ -32,7 +33,8 @@ HEADERS += \
     config.h \
     hintlabel.h \
     maindialog.h \
-    map.h
+    map.h \
+    playingmenu.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

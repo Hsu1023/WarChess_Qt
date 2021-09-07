@@ -1,11 +1,11 @@
 #include "hintlabel.h"
 #include "config.h"
 
-HintLabel::HintLabel( QWidget * parent,int x, int y):
+HintLabel::HintLabel( QWidget * parent, int x, int y):
     QLabel(parent)
 {
-    setGeometry(x,y,width(),height());
     setPixmap(QPixmap(":/pic/hint.png"));
+    setGeometry(x,y,width(),height());
 
 }
 HintLabel::HintLabel(QString t_str,QWidget * parent, int x, int y):
@@ -24,7 +24,6 @@ void HintLabel::setText(QString t_str)
 
     setFixedSize(550, 150);
 }
-
 void HintLabel::paintEvent(QPaintEvent * ev)
 {
     QLabel::paintEvent(ev);
