@@ -19,6 +19,7 @@ SOURCES += \
     gamelabel.cpp \
     gamemap.cpp \
     gamescene.cpp \
+    guidescene.cpp \
     main.cpp \
     mainscene.cpp \
     playingmenu.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
     gamelabel.h \
     gamemap.h \
     gamescene.h \
+    guidescene.h \
     mainscene.h \
     playingmenu.h \
     selectionscene.h

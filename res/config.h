@@ -43,6 +43,8 @@
 #define WARRIOR_PATH ":/pic/warrior.png"
 #define NINJA_PATH ":/pic/ninja.png"
 #define SWORDSMAN_PATH ":/pic/swordsman.png"
+#define GUIDE1_PATH ":/pic/guide1.png"
+#define GUIDE2_PATH ":/pic/guide2.png"
 
 
 #define BGM_PATH ":/music/bgm.wav"

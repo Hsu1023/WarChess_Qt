@@ -11,22 +11,35 @@ MainScene::MainScene(QWidget* parent):
 
     background.load(":/pic/background.png");
 
+
+    QPixmap m_pixmap0 = QPixmap(":/pic/guide_button.png");
     QPixmap m_pixmap1 = QPixmap(":/pic/one_player_button.png");
     QPixmap m_pixmap2 = QPixmap(":/pic/two_players_button.png");
 
-   // m_pixmap = m_pixmap.scaled(400, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    button[0] = new ClickLabel(400,120,m_pixmap1,this,ClickLabel::TRANSPARENTSTYLE);
-    button[0]->setGeometry(610,550,400,120);
+    button[0] = new ClickLabel(400,120,m_pixmap0,this,ClickLabel::TRANSPARENTSTYLE);
+    button[0]->setGeometry(610,450,400,120);
     button[0]->raise();
     button[0]->show();
 
-    button[1] = new ClickLabel(400,120,m_pixmap2,this,ClickLabel::TRANSPARENTSTYLE);
-    button[1]->setGeometry(610,750,400,120);
+    button[1] = new ClickLabel(400,120,m_pixmap1,this,ClickLabel::TRANSPARENTSTYLE);
+    button[1]->setGeometry(610,600,400,120);
     button[1]->raise();
     button[1]->show();
 
-    connect(button[0], &ClickLabel::clicked, this,[=](){
+    button[2] = new ClickLabel(400,120,m_pixmap2,this,ClickLabel::TRANSPARENTSTYLE);
+    button[2]->setGeometry(610,750,400,120);
+    button[2]->raise();
+    button[2]->show();
+
+    guideScene = new GuideScene(this);
+
+    connect(button[0], &ClickLabel::clicked, this, [=](){
+        guideScene->show();
+        this->hide();
+    });
+
+    connect(button[1], &ClickLabel::clicked, this,[=](){
         selectionScene = new SelectionScene(ONEPLAYER);
         connect(selectionScene, &SelectionScene::exit,this, [=](){
             this->show();
@@ -38,7 +51,7 @@ MainScene::MainScene(QWidget* parent):
                 QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
        this->hide();
     });
-    connect(button[1], &ClickLabel::clicked, this,[=](){
+    connect(button[2], &ClickLabel::clicked, this,[=](){
         selectionScene = new SelectionScene(TWOPLAYERS);
         connect(selectionScene, &SelectionScene::exit,this, [=](){
             this->show();
