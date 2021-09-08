@@ -32,6 +32,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
         propertyDlg->updateData(m_hp,m_fullhp,m_move,m_fullmove,m_localCellx,m_localCelly);
         selectionDlg->updateData(m_localCellx,m_localCelly);
         hpLabel->reset(m_hp, m_fullhp, belong);
+        hpLabel->repaint();
     });
 
     connect(selectionDlg->moveButton, &QPushButton::clicked,
@@ -41,6 +42,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
     connect(selectionDlg->skipButton, &QPushButton::clicked,
             this, &Character::skipAction);
     connect(this, &Character::beAttracked, this, &Character::attrackedEvent);
+
 
     setFixedSize(64,64);
 
@@ -55,7 +57,7 @@ void Character::setLabel()
 Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
     Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
 {
-    m_hp =50; m_fullhp = 100;
+    m_hp = 100; m_fullhp = 100;
     m_move = m_fullmove = 4;
     m_attrack = 40;
     m_attrackable=1;
@@ -111,31 +113,32 @@ void Character::attrackAction()
 }
 void Character::attrackedEvent(int attrack)
 {
-    double d = (rand()%20-40)/100 + 1;
+    double d = 1.0*(rand()%40-20)/100 + 1;
     attrack = int(1.0 * d *attrack);
 
     m_hp -= attrack;
     //扣血
     QLabel *tempLabel= new QLabel(parentWidget());
     tempLabel->setAttribute(Qt::WA_DeleteOnClose);
-    tempLabel->setStyleSheet("color:rgb(255,40,0,0.8); font:bold; font-size:20px;");
+    tempLabel->setStyleSheet("color:rgb(255,40,0); font:bold; font-size:20px;");
     tempLabel->setText(QString("-%1").arg(attrack));
     tempLabel->show();
     tempLabel->raise();
     QPropertyAnimation* animation = new QPropertyAnimation(tempLabel,"geometry");
-    animation->setDuration(500);
+    animation->setDuration(1000);
     animation->setStartValue(QRect((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-30, tempLabel->width(),tempLabel->height()));
     animation->setEndValue(QRect((m_localCellx-1)*CELL_SIZE+CELL_SIZE/4, (m_localCelly-1)*CELL_SIZE-30 -30,tempLabel->width(),tempLabel->height()));
     animation->start();
+
+    emit infoChanged();
+    qDebug()<<attrack<<m_hp;
     if(m_hp<=0)
     {
        characterState=DEAD;
        hide();
        emit dieOneCharacter(this);//TODO:slot
     }
-    QTimer::singleShot(500,[=](){tempLabel->close();});
-
-    emit infoChanged();
+    QTimer::singleShot(1000,[=](){tempLabel->close();});
 }
 void Character::skipAction()
 {

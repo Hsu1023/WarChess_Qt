@@ -5,7 +5,7 @@
 class FindPathAlgorithm
 {
 public:
-    int resultMap[100][100];
+    int resultMap[51][31];
     FindPathAlgorithm();// 0为不可行，1为可行
     int totalMove;
     bool foundPathOrNot;

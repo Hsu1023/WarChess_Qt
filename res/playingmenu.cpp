@@ -72,5 +72,5 @@ ResultMenu::ResultMenu(bool blueWinOrNot, bool AIOpenOrNot, QWidget *parent):
         button[i]->raise();
     }
     connect(button[0], &ClickLabel::clicked,[=](){emit restartGame();});
-    connect(button[1], &ClickLabel::clicked,[=](){emit exitGame();});
+    connect(button[1], &ClickLabel::clicked,[=](){qDebug()<<"exit";emit exitGame();});
 }

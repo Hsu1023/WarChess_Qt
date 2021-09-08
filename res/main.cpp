@@ -7,6 +7,7 @@
 
 int main(int argc, char *argv[])
 {
+    srand(time(0));
     QApplication a(argc, argv);;
     // 适应中文
     QTextCodec *codec = QTextCodec::codecForName("utf8");

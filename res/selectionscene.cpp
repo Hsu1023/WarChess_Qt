@@ -1,7 +1,7 @@
 #include "selectionscene.h"
 
 SelectionScene::SelectionScene(QWidget* parent):
-    QWidget(parent)
+    QDialog(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -42,8 +42,8 @@ SelectionScene::SelectionScene(QWidget* parent):
     connect(button[0], &ClickLabel::clicked, [=](){
         gameScene = new GameScene;
         connect(gameScene, &GameScene::exit, [=](){
-            gameScene->close();
-            this->close();
+            gameScene->hide();
+            this->hide();
             emit exit();
         });
         connect(gameScene, &GameScene::restart,[=](){
@@ -51,6 +51,9 @@ SelectionScene::SelectionScene(QWidget* parent):
             emit button[0]->clicked();
         });
         gameScene->show();
+        QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒
+        while (QTime::currentTime() < dieTime)
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         this->hide();
     });
 

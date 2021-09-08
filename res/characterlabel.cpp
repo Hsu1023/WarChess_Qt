@@ -81,6 +81,7 @@ HPLabel::HPLabel(int hp, int totalhp, bool belong,QWidget *parent):
 void HPLabel::reset(int t_hp, int t_totalhp, bool t_belong)
 {
     m_hp = t_hp;
+    if(m_hp < 0) m_hp = 0;
     m_totalhp = t_totalhp;
     m_belong = t_belong;
 }

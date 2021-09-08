@@ -4,7 +4,7 @@
 #include "algorithm.h"
 //TODO: cancelButton大一点易看见变化
 GameScene::GameScene(QWidget *parent)
-    : QWidget(parent)
+    : QDialog(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -36,7 +36,7 @@ GameScene::GameScene(QWidget *parent)
     character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
     //character[3] = new Warrior(10, 15, m_x, m_y,MINE, this);
     character[1] = new Warrior(15, 14, m_x, m_y,YOURS, this);
-    character[2] = new Warrior(3, 3, m_x, m_y, MINE, this);
+    character[2] = new Warrior(13, 13, m_x, m_y, MINE, this);
 
     aliveNum[MINE] = aliveNum[YOURS] = 0;
     for(int i=0;i<characterNum;i++)
@@ -96,11 +96,17 @@ GameScene::GameScene(QWidget *parent)
 
     connect(this, &GameScene::myWin, [=](){
         resultMenu = new ResultMenu(1, AIOpenOrNot, this);
+        connect(resultMenu, &ResultMenu::exitGame, [=](){emit exit();});
+        connect(resultMenu, &ResultMenu::restartGame, [=](){emit restart();});
         resultMenu->show();
+        resultMenu->raise();
     });
     connect(this, &GameScene::myLoss, [=](){
         resultMenu = new ResultMenu(0, AIOpenOrNot, this);
+        connect(resultMenu, &ResultMenu::exitGame, [=](){emit exit();});
+        connect(resultMenu, &ResultMenu::restartGame, [=](){emit restart();});
         resultMenu->show();
+        resultMenu->raise();
     });
 
     emit moveScreen();
@@ -292,15 +298,18 @@ void GameScene::dieOneCharacterEvent(Character* deadCharacter)
     if(aliveNum[character[id]->m_belong]==0)
     {
         hint->hide();
+        gameState = END;
         if(character[id]->m_belong==MINE)emit myLoss();
         else emit myWin();
+        return;
     }
     repaint();
 }
 void GameScene::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+    if(gameState == END)return;
 
+    QPainter painter(this);
     // 画背景图
     painter.drawPixmap(m_x, m_y, m_map.m_map1);
 
@@ -463,8 +472,9 @@ void GameScene::mousePressEvent(QMouseEvent* event)
                     cancelButton->hide();
                     nowCharacter->attracker->startMove(nowCharacter, nowCharacter->m_localCellx, nowCharacter->m_localCelly,
                                              character[i]->m_localCellx, character[i]->m_localCelly);
-                    connect(nowCharacter->attracker, &AttrackAnimation::animationFinished,[=](){
+                    connect(nowCharacter->attracker, &AttrackAnimation::animationFinished,this,[=](){
                         emit character[i]->beAttracked(nowCharacter->m_attrack);
+                        disconnect(nowCharacter->attracker,0,this,0);
                         gameState=BEGIN;
                         nowCharacter->characterState=BEGIN;
                         nowCharacter->attrackedOrNot=true;

@@ -5,7 +5,7 @@
 #include "gamescene.h"
 #include "gamelabel.h"
 
-class SelectionScene : public QWidget
+class SelectionScene : public QDialog
 {
     Q_OBJECT
 public:

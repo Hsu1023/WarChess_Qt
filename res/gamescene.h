@@ -10,13 +10,13 @@
 #include "animation.h"
 #include "playingmenu.h"
 
-class GameScene : public QWidget
+class GameScene : public QDialog
 {
     Q_OBJECT
 public:
     FindPathAlgorithm moveAl, attrackAl;
 public:
-    enum GAMESTATE{BEGIN,FINDPATH,FINDATTRACK,AI};
+    enum GAMESTATE{BEGIN,FINDPATH,FINDATTRACK,AI,END};
     GameScene(QWidget *parent = nullptr);
     ~GameScene();
     void paintEvent(QPaintEvent*)override;
@@ -65,5 +65,6 @@ public slots:
     void endOneCharacterEvent(Character*);
     void dieOneCharacterEvent(Character*);
     void receiveHint(QString str);
+    //void attrackAnimationWaiter();
 };
 #endif // GAMESCENE_H

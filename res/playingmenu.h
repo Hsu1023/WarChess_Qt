@@ -2,6 +2,7 @@
 #define PLAYINGMENU_H
 
 #include "gamelabel.h"
+#include "config.h"
 #include <QWidget>
 #include <QPushButton>
 

@@ -6,7 +6,7 @@
 #include "selectionscene.h"
 #include <QWidget>
 
-class MainScene :public QWidget
+class MainScene :public QDialog
 {
 public:
     MainScene(QWidget* parent = nullptr);

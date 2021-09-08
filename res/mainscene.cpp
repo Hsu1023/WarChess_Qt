@@ -1,7 +1,7 @@
 #include "mainscene.h"
 
 MainScene::MainScene(QWidget* parent):
-    QWidget(parent)
+    QDialog(parent)
 {
 
     setWindowFlags(Qt::WindowCloseButtonHint);
@@ -26,7 +26,10 @@ MainScene::MainScene(QWidget* parent):
             selectionScene->hide();
         });
         selectionScene->show();
-        this->hide();
+        QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒
+        while (QTime::currentTime() < dieTime)
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+       this->hide();
     });
 
 }
