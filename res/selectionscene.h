@@ -9,13 +9,14 @@ class SelectionScene : public QDialog
 {
     Q_OBJECT
 public:
-    SelectionScene(QWidget* parent = nullptr);
+    SelectionScene(int gameMode = ONEPLAYER, QWidget* parent = nullptr);
 public:
     GameScene *gameScene;
     QPixmap background;
     void paintEvent(QPaintEvent*)override;
     ClickLabel *button[4];
-    void createGameScene(int chapter);
+    int lastSelection;
+    void createGameScene(int chapter, int gameMode);
 signals:
     void exit();
 };

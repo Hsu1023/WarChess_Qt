@@ -4,7 +4,7 @@
 #include "algorithm.h"
 //TODO: cancelButton大一点易看见变化
 
-GameScene::GameScene(int chapter, QWidget *parent)
+GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     : QDialog(parent), m_map(GameMap(chapter))
 {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -17,8 +17,8 @@ GameScene::GameScene(int chapter, QWidget *parent)
 
     playingMenu = new PlayingMenu(this);
     playingMenu->hide();
-    connect(playingMenu, &PlayingMenu::exitGame, [=](){emit exit();});
-    connect(playingMenu, &PlayingMenu::restartGame, [=](){emit restart();});
+    connect(playingMenu, &PlayingMenu::exitGame, [=](){bgm->stop();emit exit();});
+    connect(playingMenu, &PlayingMenu::restartGame, [=](){bgm->stop();emit restart();});
 
     setButton();
     hint = new HintLabel(this);
@@ -79,12 +79,12 @@ GameScene::GameScene(int chapter, QWidget *parent)
             if(AIOpenOrNot == false || character[i]->m_belong == MINE)
                 character[i]->selectionDlg->show();
         });
-        connect(character[i]->attracker,&AttrackAnimation::animationStarted,[=]()
+        connect(character[i]->attracker,&AttrackAnimation::animationStarted, this, [=]()
         {
             screenMoveOrNot = false;
             attrackSound->play();
         });
-        connect(character[i]->attracker,&AttrackAnimation::animationFinished,[=]()
+        connect(character[i]->attracker,&AttrackAnimation::animationFinished, this, [=]()
         {
             //emit nowCharacter->infoChanged();
             screenMoveOrNot = true;
@@ -93,15 +93,15 @@ GameScene::GameScene(int chapter, QWidget *parent)
         });
     }
 
-    AIOpenOrNot = true;
+    AIOpenOrNot = gameMode;
     aiController = new AIController(character, characterNum);
-    connect(aiController, &AIController::AIRoundBegin, [=](){skipButton->hide();});
+    connect(aiController, &AIController::AIRoundBegin, this, [=](){skipButton->hide();});
     connect(aiController, &AIController::AIRoundFinished, [=](){skipButton->show();nextRound(YOURS);});
 
     connect(this, &GameScene::myWin, [=](){
         resultMenu = new ResultMenu(1, AIOpenOrNot, this);
-        connect(resultMenu, &ResultMenu::exitGame, [=](){emit exit();});
-        connect(resultMenu, &ResultMenu::restartGame, [=](){emit restart();});
+        connect(resultMenu, &ResultMenu::exitGame, this, [=](){emit exit();});
+        connect(resultMenu, &ResultMenu::restartGame, this, [=](){emit restart();});
         resultMenu->show();
         resultMenu->raise();
     });
@@ -162,7 +162,7 @@ void GameScene::setButton()
     menuButton->setGeometry(1450,830,60,48);
     menuButton->setStyleSheet("border:none;");
 
-    connect(cancelButton, &ClickLabel::clicked, [=](){
+    connect(cancelButton, &ClickLabel::clicked, this, [=](){
        zoom(cancelButton);
        clickSound->play();
        if(nowCharacter->characterState == Character::DEAD)return;
@@ -174,7 +174,7 @@ void GameScene::setButton()
        cancelButton->hide();
        repaint();
     });
-    connect(skipButton, &ClickLabel::clicked, [=](){
+    connect(skipButton, &ClickLabel::clicked, this, [=](){
         zoom(skipButton);
         clickSound->play();
         //attrackSound->play();
@@ -182,7 +182,7 @@ void GameScene::setButton()
         if(nowCharacter)nowCharacter->selectionDlg->hide();
         nextRound(roundBelonged);
     });
-    connect(musicButton, &ClickLabel::clicked, [=](){
+    connect(musicButton, &ClickLabel::clicked, this, [=](){
         //emit myLoss();
         zoom(musicButton);
         clickSound->play();
@@ -198,7 +198,7 @@ void GameScene::setButton()
         }
         //TODO:
     });
-    connect(menuButton, &ClickLabel::clicked, [=](){
+    connect(menuButton, &ClickLabel::clicked, this, [=](){
         zoom(menuButton);
         clickSound->play();
         playingMenu->show();
@@ -232,6 +232,7 @@ void GameScene::nextRound(int last)
         }
         else
         {
+            character[i]->selectionDlg->hide();
             if(GameMap::binMap[character[i]->m_cellx][character[i]->m_celly]==2)
             {
                 emit character[i]->beAttracked(10);
@@ -239,8 +240,16 @@ void GameScene::nextRound(int last)
         }
     }
     roundNum[next] = aliveNum[next];
-    if(last==MINE)receiveHint("红方回合");
-    else receiveHint("蓝方回合");
+    if(AIOpenOrNot==false)
+    {
+        if(last==MINE)receiveHint("红方回合");
+        else receiveHint("蓝方回合");
+    }
+    else
+    {
+        if(last==MINE)receiveHint("对方回合");
+        else receiveHint("己方回合");
+    }
     if(AIOpenOrNot == true && next == YOURS)
     {
         gameState = AI;
@@ -294,7 +303,7 @@ void GameScene::characterAttrackEvent(Character* t_nowCharacter)
     if(findOneOrNot == false)
     {
         receiveHint("没有可攻击的对象");
-        QTimer::singleShot(500,[=](){emit cancelButton->clicked();});
+        QTimer::singleShot(500,this,[=](){emit cancelButton->clicked();});
     }
 }
 void GameScene::endOneCharacterEvent(Character* endedCharacter)
@@ -427,9 +436,15 @@ void GameScene::paintEvent(QPaintEvent *)
 }
 void GameScene::mousePressEvent(QMouseEvent* event)
 {
+    if(event->button() == Qt::RightButton)
+    {
+        if(cancelButton->isHidden()==false)
+            emit cancelButton->clicked();
+        return;
+    }
     updateMousePosition(event);
 
-    if(gameState==AI)return;
+    if(AIOpenOrNot==true&&gameState==AI)return;
 
     if(gameState==BEGIN)
     {
@@ -491,17 +506,18 @@ void GameScene::mousePressEvent(QMouseEvent* event)
         {
             for(int i=0;i<characterNum;i++)
             {
-                if(character[i]->m_belong==roundBelonged ||//友军
-                    nowCharacter->characterState == Character::DEAD)//死了
-                {
-                    clickSound->play();
-                    gameState=BEGIN;
-                    nowCharacter->characterState=BEGIN;
-                    nowCharacter->attrackedOrNot=false;
-                    break;
-                }
+
                 if(character[i]->m_cellx==mouseCellx&&character[i]->m_celly==mouseCelly)//点中
                 {
+                    if(character[i]->m_belong==roundBelonged ||//友军
+                        character[i]->characterState == Character::DEAD)//死了
+                    {
+                        clickSound->play();
+                        gameState=BEGIN;
+                        nowCharacter->characterState=BEGIN;
+                        nowCharacter->attrackedOrNot=false;
+                        break;
+                    }
                     cancelButton->hide();
                     nowCharacter->attracker->startMove(nowCharacter, nowCharacter->m_localCellx, nowCharacter->m_localCelly,
                                              character[i]->m_localCellx, character[i]->m_localCelly);
@@ -530,7 +546,7 @@ void GameScene::receiveHint(QString str)
     hint->setText(str);
     if(hint->isHidden()==true)
         hint->show();
-    QTimer::singleShot(1500,[=](){hint->hide();});
+    QTimer::singleShot(1500,this,[=](){hint->hide();});
 }
 void GameScene::mouseMoveEvent(QMouseEvent* event)
 {
@@ -586,7 +602,7 @@ void GameScene::setScreenMoveTimer()
     rtimer->setInterval(MOUSE_MOVE_TIMER_INTERVAL);
     connect(this, SIGNAL(moveRight()), rtimer, SLOT(start()));
     connect(this, SIGNAL(notMoveRight()),rtimer, SLOT(stop()));
-    connect(rtimer, &QTimer::timeout, [this]()
+    connect(rtimer, &QTimer::timeout, this,[this]()
     {
         if(screenMoveOrNot == false)return;
         if(-m_x >= MAP_WIDTH - WINDOW_WIDTH)
@@ -606,7 +622,7 @@ void GameScene::setScreenMoveTimer()
     ltimer->setInterval(MOUSE_MOVE_TIMER_INTERVAL);
     connect(this, SIGNAL(moveLeft()), ltimer, SLOT(start()));
     connect(this, SIGNAL(notMoveLeft()),ltimer, SLOT(stop()));
-    connect(ltimer, &QTimer::timeout, [this]()
+    connect(ltimer, &QTimer::timeout, this,[this]()
     {
         if(screenMoveOrNot == false)return;
         if(m_x >= 0)
@@ -626,7 +642,7 @@ void GameScene::setScreenMoveTimer()
     dtimer->setInterval(MOUSE_MOVE_TIMER_INTERVAL);
     connect(this, SIGNAL(moveDown()), dtimer, SLOT(start()));
     connect(this, SIGNAL(notMoveDown()),dtimer, SLOT(stop()));
-    connect(dtimer, &QTimer::timeout, [this]()
+    connect(dtimer, &QTimer::timeout, this,[this]()
     {
         if(screenMoveOrNot == false)return;
         if(-m_y >= MAP_HEIGHT - WINDOW_HEIGHT)
@@ -646,7 +662,7 @@ void GameScene::setScreenMoveTimer()
     utimer->setInterval(MOUSE_MOVE_TIMER_INTERVAL);
     connect(this, SIGNAL(moveUp()), utimer, SLOT(start()));
     connect(this, SIGNAL(notMoveUp()),utimer, SLOT(stop()));
-    connect(utimer, &QTimer::timeout, [this]()
+    connect(utimer, &QTimer::timeout, this,[this]()
     {
         if(screenMoveOrNot == false)return;
         if(m_y >= 0)

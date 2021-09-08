@@ -22,5 +22,7 @@
         <file>pic/ninja.png</file>
         <file>pic/map1.png</file>
         <file>pic/warrior.png</file>
+        <file>pic/one_player_button.png</file>
+        <file>pic/two_players_button.png</file>
     </qresource>
 </RCC>

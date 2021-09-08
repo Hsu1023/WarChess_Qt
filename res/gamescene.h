@@ -17,7 +17,7 @@ public:
     FindPathAlgorithm moveAl, attrackAl;
 public:
     enum GAMESTATE{BEGIN,FINDPATH,FINDATTRACK,AI,END};
-    GameScene(int chapter, QWidget *parent = nullptr);
+    GameScene(int chapter, int gameMode = ONEPLAYER, QWidget *parent = nullptr);
     ~GameScene();
     void paintEvent(QPaintEvent*)override;
     void mouseMoveEvent(QMouseEvent*)override;

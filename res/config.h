@@ -142,6 +142,7 @@ inline int ManhattanDist(int x1, int y1, int x2, int y2)
 
 enum BELONGING{MINE, YOURS};
 enum DERECTION{UP, DOWN, LEFT, RIGHT};
+enum GAMEMODE{ONEPLAYER = 1, TWOPLAYERS = 0};
 
 #define endtag (qDebug()<<"end")
 #define begintag (qDebug()<<"begin")

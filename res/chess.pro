@@ -49,4 +49,7 @@ RESOURCES += \
     music.qrc \
     pic.qrc
 
+RC_ICONS += \
+    warchess.ico
+
 DISTFILES +=

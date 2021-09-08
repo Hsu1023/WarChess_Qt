@@ -14,7 +14,7 @@ public:
     SelectionScene *selectionScene;
     QPixmap background;
     void paintEvent(QPaintEvent*)override;
-    ClickLabel *button;
+    ClickLabel *button[2];
 };
 
 #endif // MAINSCENE_H
