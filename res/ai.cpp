@@ -56,5 +56,5 @@ void GameAI::attrackCharacter()
 void GameAI::waitFunc()
 {
     emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
-    emit thisCharacterFinished();
+    QTimer::singleShot(10, [=](){emit thisCharacterFinished();});
 }

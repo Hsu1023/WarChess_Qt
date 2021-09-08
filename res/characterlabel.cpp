@@ -3,6 +3,8 @@
 CharacterProperty::CharacterProperty(QString name, int fullhp, int fullmove, int attrack, int attrackable, QWidget *parent):
     QLabel(parent)
 {
+    setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    setMouseTracking(true);
     setFixedSize(165, 150);
     setPixmap(QPixmap(":/pic/dlg.png"));
 
@@ -92,9 +94,9 @@ void HPLabel::paintEvent(QPaintEvent *)
         painter.setBrush(Qt::red);
     else
         painter.setBrush(Qt::blue);
-    painter.drawRect(5,0, (1.0 * m_hp / m_totalhp)*CELL_SIZE-10, HP_HEIGHT);
+    painter.drawRect(2,0, (1.0 * m_hp / m_totalhp)*CELL_SIZE-4, HP_HEIGHT);
     painter.setBrush(Qt::NoBrush);
     painter.setPen(Qt::black);
-    painter.drawRect(5,0, CELL_SIZE-10, HP_HEIGHT);
+    painter.drawRect(2,0, CELL_SIZE-4, HP_HEIGHT);
     painter.setPen(Qt::NoPen);
 }

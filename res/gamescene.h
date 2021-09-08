@@ -22,6 +22,7 @@ public:
     void paintEvent(QPaintEvent*)override;
     void mouseMoveEvent(QMouseEvent*)override;
     void mousePressEvent(QMouseEvent*)override;
+    bool eventFilter(QObject*, QEvent*)override;
     void setScreenMoveTimer();
     void setButton();
     void checkScreenMove();

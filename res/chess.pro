@@ -15,6 +15,7 @@ SOURCES += \
     animation.cpp \
     character.cpp \
     characterlabel.cpp \
+    characterrole.cpp \
     gamelabel.cpp \
     gamemap.cpp \
     gamescene.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     animation.h \
     character.h \
     characterlabel.h \
+    characterrole.h \
     config.h \
     gamelabel.h \
     gamemap.h \
@@ -47,5 +49,4 @@ RESOURCES += \
     music.qrc \
     pic.qrc
 
-DISTFILES += \
-    pic/warrior.gif
+DISTFILES +=

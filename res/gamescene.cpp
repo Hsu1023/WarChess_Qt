@@ -1,5 +1,5 @@
 #include "gamescene.h"
-#include "character.h"
+#include "characterrole.h"
 #include "gamelabel.h"
 #include "algorithm.h"
 //TODO: cancelButton大一点易看见变化
@@ -27,17 +27,18 @@ GameScene::GameScene(int chapter, QWidget *parent)
     setScreenMoveTimer();
     screenMoveOrNot = true;
 
-
     bgm = new QSound(":/music/bgm.wav",this);
     bgm->setLoops(QSound::Infinite);
     attrackSound = new QSound(":/music/attrack.wav", this);
     clickSound = new QSound(":/music/click.wav", this);
 
-    characterNum = 3;
+    characterNum = 6;
     character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
-    //character[3] = new Warrior(10, 15, m_x, m_y,MINE, this);
-    character[1] = new Warrior(15, 14, m_x, m_y,YOURS, this);
-    character[2] = new Warrior(13, 13, m_x, m_y, MINE, this);
+    character[1] = new Swordsman(3, 5, m_x, m_y,YOURS, this);
+    character[2] = new Ninja(15, 14, m_x, m_y,YOURS, this);
+    character[3] = new Warrior(13, 13, m_x, m_y, MINE, this);
+    character[4] = new Swordsman(10, 19, m_x, m_y, MINE, this);
+    character[5] = new Ninja(19, 15, m_x, m_y, MINE, this);
 
     aliveNum[MINE] = aliveNum[YOURS] = 0;
     for(int i=0;i<characterNum;i++)
@@ -61,15 +62,17 @@ GameScene::GameScene(int chapter, QWidget *parent)
 
     for(int i=0;i<characterNum;i++)
     {
-        character[i]->setMouseTracking(true);
+
+        character[i]->installEventFilter(this);
+        connect(character[i],&Character::repaintScreen,this,[=](){repaint();});
         connect(character[i],&Character::characterMoveAction,this,&GameScene::characterMoveEvent);
         connect(character[i],&Character::characterAttrackAction,this,&GameScene::characterAttrackEvent);
         connect(character[i],&Character::endOneCharacter,this,&GameScene::endOneCharacterEvent);
         connect(character[i],&Character::dieOneCharacter,this,&GameScene::dieOneCharacterEvent);
         connect(character[i],&Character::submitHint, this, &GameScene::receiveHint);
-        connect(character[i],&Character::hideCancelButton, [=](){emit cancelButton->clicked();});
+        connect(character[i],&Character::hideCancelButton,this, [=](){emit cancelButton->clicked();});
         connect(character[i]->mover,&MoveAnimation::animationStarted,[=](){screenMoveOrNot = false;});
-        connect(character[i]->mover,&MoveAnimation::animationFinished,[=]()
+        connect(character[i]->mover,&MoveAnimation::animationFinished,this,[=]()
         {
             //emit nowCharacter->infoChanged();
             screenMoveOrNot = true;
@@ -104,13 +107,36 @@ GameScene::GameScene(int chapter, QWidget *parent)
     });
     connect(this, &GameScene::myLoss, [=](){
         resultMenu = new ResultMenu(0, AIOpenOrNot, this);
-        connect(resultMenu, &ResultMenu::exitGame, [=](){emit exit();});
-        connect(resultMenu, &ResultMenu::restartGame, [=](){emit restart();});
+        connect(resultMenu, &ResultMenu::exitGame, this, [=](){emit exit();});
+        connect(resultMenu, &ResultMenu::restartGame, this, [=](){emit restart();});
         resultMenu->show();
         resultMenu->raise();
     });
 
-    emit moveScreen();
+    for(int i=0;i<characterNum;i++)
+    {
+        redrawCharacter();
+        if(character[i]->characterState!=Character::DEAD)
+            character[i]->updateInfo();
+    }
+    repaint();
+}
+
+bool GameScene::eventFilter(QObject * watched, QEvent *event)
+{
+    if (watched->metaObject()->className() == QStringLiteral("Character"))
+    {
+        Character * now = qobject_cast<Character*>(watched);
+        if(event->type() == QEvent::Enter)
+        {
+
+            mouseCellx = now->m_cellx;
+            mouseCelly = now->m_celly;
+            repaint();
+            return false;
+        }
+    }
+    return false;
 }
 GameScene::~GameScene()
 {
@@ -197,14 +223,21 @@ void GameScene::nextRound(int last)
     //更新下一回合character
     for(int i = 0; i < characterNum; i++)
     {
-        if(character[i]->m_belong==next&&character[i]->characterState!=Character::DEAD)
+        if(character[i]->characterState==Character::DEAD)continue;
+        if(character[i]->m_belong==next)
         {
             character[i]->characterState = Character::BEGIN;
             character[i]->attrackedOrNot = false;
             character[i]->m_move = character[i]->m_fullmove;
         }
+        else
+        {
+            if(GameMap::binMap[character[i]->m_cellx][character[i]->m_celly]==2)
+            {
+                emit character[i]->beAttracked(10);
+            }
+        }
     }
-    //if(character[1]->characterState==Character::DEAD)qDebug()<<"DEAD";else qDebug()<<"EXISTING";
     roundNum[next] = aliveNum[next];
     if(last==MINE)receiveHint("红方回合");
     else receiveHint("蓝方回合");
@@ -293,7 +326,7 @@ void GameScene::dieOneCharacterEvent(Character* deadCharacter)
     }
     int alive = 0;
     for(int i = 0; i < characterNum; i++)
-        if(character[i]->m_belong == deadCharacter->m_belong&&id!=i)
+        if(character[i]->m_belong == deadCharacter->m_belong&&id!=i&&character[i]->characterState!=Character::DEAD)
             alive++;
     aliveNum[character[id]->m_belong] = alive;
     if(aliveNum[character[id]->m_belong]==0)
@@ -411,7 +444,6 @@ void GameScene::mousePressEvent(QMouseEvent* event)
                 if(character[i]->selectionDlg->isHidden()==false)
                     character[i]->selectionDlg->hide();
             }
-            //应该封装
             //点中了人物
             if(mouseLocalCellx==character[i]->m_localCellx&&
                     mouseLocalCelly==character[i]->m_localCelly)
@@ -445,14 +477,6 @@ void GameScene::mousePressEvent(QMouseEvent* event)
             moveAl.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, mouseCellx, mouseCelly, 0, moveAl.resultMap[mouseCellx][mouseCelly]);
             nowCharacter->movePos(moveAl.resultMap[mouseCellx][mouseCelly],moveAl.path);
             cancelButton->hide();
-            //沙漠
-            if(GameMap::binMap[mouseCellx][mouseCelly]==2)
-            {
-                connect(nowCharacter->mover, &MoveAnimation::animationFinished, this, [=](){
-                    nowCharacter->beAttracked(10);
-                    disconnect(nowCharacter->mover, 0, this, 0);
-                });
-            }
             gameState=BEGIN;
             if(nowCharacter->characterState!=Character::DEAD)
                 nowCharacter->characterState=BEGIN;

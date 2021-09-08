@@ -1,20 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>pic/dlg.png</file>
-        <file>pic/map1.png</file>
-        <file>pic/map1.psd</file>
-        <file>pic/warrior_0.png</file>
-        <file>pic/warrior_down_1.png</file>
-        <file>pic/warrior_down_2.png</file>
-        <file>pic/warrior_down_3.png</file>
-        <file>pic/warrior_down_4.png</file>
         <file>pic/cancel_button.png</file>
         <file>pic/menu_button.png</file>
         <file>pic/skip_button.png</file>
         <file>pic/hint.png</file>
         <file>pic/music_button_off.png</file>
         <file>pic/music_button_on.png</file>
-        <file>pic/warrior.gif</file>
         <file>pic/back_to_game.png</file>
         <file>pic/exit_game.png</file>
         <file>pic/restart.png</file>
@@ -26,5 +18,9 @@
         <file>pic/chaptermore_button.png</file>
         <file>pic/chapterreturn_button.png</file>
         <file>pic/map2.png</file>
+        <file>pic/swordsman.png</file>
+        <file>pic/ninja.png</file>
+        <file>pic/map1.png</file>
+        <file>pic/warrior.png</file>
     </qresource>
 </RCC>

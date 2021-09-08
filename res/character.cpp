@@ -8,6 +8,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
     m_localCelly(t_celly - LocalScreeny / CELL_SIZE),
     m_belong(belong),characterState(BEGIN), attrackedOrNot(false)
 {
+    setAttribute(Qt::WA_MouseNoMask, true);
     mover = new MoveAnimation;
     attracker = new AttrackAnimation;
     connect(mover, &MoveAnimation::widgetDown, [=](){m_celly++; m_localCelly++;});
@@ -46,7 +47,7 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
 
     setFixedSize(64,64);
 
-    //setMouseTracking(true);
+    setMouseTracking(true);
 
     //repaint();
 
@@ -54,43 +55,30 @@ Character::Character( int t_cellx, int t_celly, int LocalScreenx, int LocalScree
 void Character::setLabel()
 {
 }
-Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
-    Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
-{
-    m_hp = 100; m_fullhp = 100;
-    m_move = m_fullmove = 4;
-    m_attrack = 40;
-    m_attrackable=1;
-    name = "勇士";
-    icon.load(WARRIOR_PATH);
-    setPixmap(icon);
-//begintag;
-    hpLabel = new HPLabel(m_hp, m_fullhp, m_belong, this);
-//endtag;
-    propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack,m_attrackable, parent);
-    propertyDlg->hide();
-}
+
 
 void Character::enterEvent(QEvent *)
 {
-    //emit repaintScreen();
     if(propertyDlg->isHidden()==true)
     {
         propertyDlg->show();
-        propertyDlg->updateData(m_hp, m_fullhp, m_move, m_fullmove, m_localCellx, m_localCelly);
         propertyDlg->raise();
-        QTimer::singleShot(1000,[=](){
+        QTimer::singleShot(1000,this,[=](){
               propertyDlg->hide();
         });
     }
 }
 void Character::leaveEvent(QEvent *)
 {
-    //emit repaintScreen();
     if(propertyDlg->isHidden()==false)
         propertyDlg->hide();
 }
-
+/*
+void Character::mouseMoveEvent(QMouseEvent *ev)
+{
+    ev->ignore();
+}
+*/
 void Character::moveAction()
 {
     if(selectionDlg->isHidden()==false)
@@ -117,6 +105,12 @@ void Character::attrackedEvent(int attrack)
     attrack = int(1.0 * d *attrack);
     qDebug()<<"attracked";
     m_hp -= attrack;
+    if(m_hp<=0)
+    {
+       characterState=DEAD;
+       hide();
+       emit dieOneCharacter(this);
+    }
     //扣血
     QLabel *tempLabel= new QLabel(parentWidget());
     tempLabel->setAttribute(Qt::WA_DeleteOnClose);
@@ -131,13 +125,7 @@ void Character::attrackedEvent(int attrack)
     animation->start();
 
     emit infoChanged();
-    if(m_hp<=0)
-    {
-       characterState=DEAD;
-       hide();
-       emit dieOneCharacter(this);
-    }
-    QTimer::singleShot(1500,[=](){tempLabel->close();});
+    QTimer::singleShot(1500,this,[=](){tempLabel->close();});
 }
 void Character::skipAction()
 {

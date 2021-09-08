@@ -33,6 +33,7 @@ public:
     void enterEvent(QEvent *)override;
     void leaveEvent(QEvent *)override;
     void movePos(int steps, std::vector<int>path);
+    //void mouseMoveEvent(QMouseEvent *ev)override;
 public slots:
     void moveAction();
     void attrackAction();
@@ -48,11 +49,7 @@ signals:
     void endOneCharacter(Character*);//
     void submitHint(QString);
     void hideCancelButton();
+    void repaintScreen();
 };
 
-class Warrior: public Character
-{
-public:
-    Warrior(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny,bool belong, QWidget* parent = nullptr);
-};
 #endif // CHARACTER_H

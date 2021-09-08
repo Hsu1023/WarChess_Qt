@@ -35,18 +35,19 @@
 #define ANIMATION_DURATION 200
 #define ZOOM_DURATION 300
 
-#define HP_HEIGHT 8
+#define HP_HEIGHT 6
 #define HP_DISTANCE 10
 
 #define MAP1_PATH  "://pic/map1.png"
 #define MAP2_PATH  "://pic/map2.png"
-#define WARRIOR_PATH ":/pic/warrior_0.png"
+#define WARRIOR_PATH ":/pic/warrior.png"
+#define NINJA_PATH ":/pic/ninja.png"
+#define SWORDSMAN_PATH ":/pic/swordsman.png"
+
 
 #define BGM_PATH ":/music/bgm.wav"
 #define ATTRACK_MUSIC_PATH ":/music/attrack.wav"
 #define CLICK_MUSIC_PATH ":/music/click.wav"
-
-
 
 const int originMap[2][31][51]=
 {

@@ -19,9 +19,9 @@ MainScene::MainScene(QWidget* parent):
     button->raise();
     button->show();
 
-    connect(button, &ClickLabel::clicked, [=](){
+    connect(button, &ClickLabel::clicked, this,[=](){
         selectionScene = new SelectionScene;
-        connect(selectionScene, &SelectionScene::exit, [=](){
+        connect(selectionScene, &SelectionScene::exit,this, [=](){
             this->show();
             selectionScene->hide();
         });
