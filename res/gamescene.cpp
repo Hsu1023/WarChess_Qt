@@ -3,8 +3,9 @@
 #include "gamelabel.h"
 #include "algorithm.h"
 //TODO: cancelButton大一点易看见变化
-GameScene::GameScene(QWidget *parent)
-    : QDialog(parent)
+
+GameScene::GameScene(int chapter, QWidget *parent)
+    : QDialog(parent), m_map(GameMap(chapter))
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -311,7 +312,7 @@ void GameScene::paintEvent(QPaintEvent *)
 
     QPainter painter(this);
     // 画背景图
-    painter.drawPixmap(m_x, m_y, m_map.m_map1);
+    painter.drawPixmap(m_x, m_y, m_map.m_pic);
 
     //右上角
     if(roundBelonged==MINE)
@@ -442,11 +443,19 @@ void GameScene::mousePressEvent(QMouseEvent* event)
 
             clickSound->play();
             moveAl.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, mouseCellx, mouseCelly, 0, moveAl.resultMap[mouseCellx][mouseCelly]);
-            //for(int i=0;i<moveAl.path.size();i++){qDebug()<<moveAl.path[i];}
             nowCharacter->movePos(moveAl.resultMap[mouseCellx][mouseCelly],moveAl.path);
-            gameState=BEGIN;
             cancelButton->hide();
-            nowCharacter->characterState=BEGIN;
+            //沙漠
+            if(GameMap::binMap[mouseCellx][mouseCelly]==2)
+            {
+                connect(nowCharacter->mover, &MoveAnimation::animationFinished, this, [=](){
+                    nowCharacter->beAttracked(10);
+                    disconnect(nowCharacter->mover, 0, this, 0);
+                });
+            }
+            gameState=BEGIN;
+            if(nowCharacter->characterState!=Character::DEAD)
+                nowCharacter->characterState=BEGIN;
             //connect()
             repaint();
         }
@@ -517,6 +526,8 @@ void GameScene::updateMousePosition(QMouseEvent* event)
     mouseLocalCellx = (mousex) / CELL_SIZE + 1;
     mouseLocalCelly = (mousey) / CELL_SIZE + 1;
 }
+#define MAP_WIDTH m_map.width
+#define MAP_HEIGHT m_map.height
 void GameScene::checkScreenMove()
 {
     if(mousex >= WINDOW_WIDTH - WINDOW_BOUNDARY

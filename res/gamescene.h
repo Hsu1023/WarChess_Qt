@@ -1,7 +1,7 @@
 #ifndef GAMESCENE_H
 #define GAMESCENE_H
 
-#include "map.h"
+#include "gamemap.h"
 #include "character.h"
 #include "config.h"
 #include "algorithm.h"
@@ -17,7 +17,7 @@ public:
     FindPathAlgorithm moveAl, attrackAl;
 public:
     enum GAMESTATE{BEGIN,FINDPATH,FINDATTRACK,AI,END};
-    GameScene(QWidget *parent = nullptr);
+    GameScene(int chapter, QWidget *parent = nullptr);
     ~GameScene();
     void paintEvent(QPaintEvent*)override;
     void mouseMoveEvent(QMouseEvent*)override;
@@ -30,7 +30,7 @@ public:
     void AIRound();
     void AIMoveCharacter(int id);
 protected:
-    Map m_map;
+    GameMap m_map;
     int m_x, m_y;
     int mousex, mousey;
     int mouseCellx, mouseCelly;

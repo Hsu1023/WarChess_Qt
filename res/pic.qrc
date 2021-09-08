@@ -25,5 +25,6 @@
         <file>pic/chapter2_button.png</file>
         <file>pic/chaptermore_button.png</file>
         <file>pic/chapterreturn_button.png</file>
+        <file>pic/map2.png</file>
     </qresource>
 </RCC>

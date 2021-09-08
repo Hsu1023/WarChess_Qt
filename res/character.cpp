@@ -115,7 +115,7 @@ void Character::attrackedEvent(int attrack)
 {
     double d = 1.0*(rand()%40-20)/100 + 1;
     attrack = int(1.0 * d *attrack);
-
+    qDebug()<<"attracked";
     m_hp -= attrack;
     //扣血
     QLabel *tempLabel= new QLabel(parentWidget());
@@ -131,20 +131,19 @@ void Character::attrackedEvent(int attrack)
     animation->start();
 
     emit infoChanged();
-    qDebug()<<attrack<<m_hp;
     if(m_hp<=0)
     {
        characterState=DEAD;
        hide();
-       emit dieOneCharacter(this);//TODO:slot
+       emit dieOneCharacter(this);
     }
-    QTimer::singleShot(1000,[=](){tempLabel->close();});
+    QTimer::singleShot(1500,[=](){tempLabel->close();});
 }
 void Character::skipAction()
 {
     characterState = END;
     selectionDlg->hide();
-    emit endOneCharacter(this);//TODO:slot
+    emit endOneCharacter(this);
 }
 void Character::updateInfo()
 {
@@ -154,11 +153,6 @@ void Character::movePos(int steps, std::vector<int>path)
 {
     selectionDlg->hide();
     m_move -= steps;
-    //m_cellx = mouseCellx;
-    //m_celly = mouseCelly;
-    //m_localCellx = mouseLocalCellx;
-    //m_localCelly = mouseLocalCelly;
-    //move((mouseLocalCellx-1)*CELL_SIZE, (mouseLocalCelly-1)*CELL_SIZE);
     mover->moveAlongPath(this, path);
     updateInfo();
 }

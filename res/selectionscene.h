@@ -15,6 +15,7 @@ public:
     QPixmap background;
     void paintEvent(QPaintEvent*)override;
     ClickLabel *button[4];
+    void createGameScene(int chapter);
 signals:
     void exit();
 };

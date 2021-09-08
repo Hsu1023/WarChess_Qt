@@ -16,10 +16,10 @@ SOURCES += \
     character.cpp \
     characterlabel.cpp \
     gamelabel.cpp \
+    gamemap.cpp \
     gamescene.cpp \
     main.cpp \
     mainscene.cpp \
-    map.cpp \
     playingmenu.cpp \
     selectionscene.cpp
 
@@ -32,9 +32,9 @@ HEADERS += \
     characterlabel.h \
     config.h \
     gamelabel.h \
+    gamemap.h \
     gamescene.h \
     mainscene.h \
-    map.h \
     playingmenu.h \
     selectionscene.h
 

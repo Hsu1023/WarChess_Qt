@@ -40,28 +40,35 @@ SelectionScene::SelectionScene(QWidget* parent):
     button[3]->show();
 
     connect(button[0], &ClickLabel::clicked, [=](){
-        gameScene = new GameScene;
-        connect(gameScene, &GameScene::exit, [=](){
-            gameScene->hide();
-            this->hide();
-            emit exit();
-        });
-        connect(gameScene, &GameScene::restart,[=](){
-            gameScene->close();
-            emit button[0]->clicked();
-        });
-        gameScene->show();
-        QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒
-        while (QTime::currentTime() < dieTime)
-                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        this->hide();
+        createGameScene(1);
     });
-
+    connect(button[1], &ClickLabel::clicked, [=](){
+        createGameScene(2);
+    });
     connect(button[3], &ClickLabel::clicked, [=](){
         this->close();
         emit exit();
     });
 
+}
+void SelectionScene::createGameScene(int chapter)
+{
+    gameScene = new GameScene(chapter);
+
+    connect(gameScene, &GameScene::exit, [=](){
+        gameScene->hide();
+        this->hide();
+        emit exit();
+    });
+    connect(gameScene, &GameScene::restart,[=](){
+        gameScene->close();
+        emit button[0]->clicked();
+    });
+    gameScene->show();
+    QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒
+    while (QTime::currentTime() < dieTime)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    this->hide();
 }
 void SelectionScene::paintEvent(QPaintEvent *)
 {

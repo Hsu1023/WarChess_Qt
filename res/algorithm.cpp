@@ -1,5 +1,6 @@
 #include "algorithm.h"
 #include "config.h"
+#include "gamemap.h"
 
 FindPathAlgorithm::FindPathAlgorithm()
 {
@@ -30,16 +31,37 @@ void FindPathAlgorithm::findAvailableCell(int x, int y, int depth, Character* ch
         v.push_back(std::make_pair(x,y));
     }
 
-    if(depth==totalMove)return;
+    if(depth>=totalMove)return;
 
-    if(x-1>=1&&binMap[x-1][y]!=0)
-        findAvailableCell(x-1,y,depth+1,character,characterNum);
-    if(x+1<=50&&binMap[x+1][y]!=0)
-        findAvailableCell(x+1,y,depth+1,character,characterNum);
-    if(y+1<=30&&binMap[x][y+1]!=0)
-        findAvailableCell(x,y+1,depth+1,character,characterNum);
-    if(y-1>=1&&binMap[x][y-1]!=0)
-        findAvailableCell(x,y-1,depth+1,character,characterNum);
+    if(x - 1 >= 1 && GameMap::binMap[x - 1][y] != 0)
+    {
+        if(GameMap::binMap[x - 1][y] == 3)//水
+            findAvailableCell(x - 1, y, depth + 2, character, characterNum);
+        else
+            findAvailableCell(x - 1, y, depth + 1, character, characterNum);
+    }
+    if(x + 1 <= 50 && GameMap::binMap[x + 1][y] != 0)
+    {
+        if(GameMap::binMap[x + 1][y] == 3)//水
+            findAvailableCell(x + 1, y, depth + 2, character, characterNum);
+        else
+            findAvailableCell(x + 1, y, depth + 1, character, characterNum);
+    }
+    if(y + 1 <= 30 && GameMap::binMap[x][y + 1]!=0)
+    {
+
+        if(GameMap::binMap[x][y + 1] == 3)//水
+            findAvailableCell(x, y + 1, depth + 2, character, characterNum);
+        else
+            findAvailableCell(x, y + 1, depth + 1, character, characterNum);
+    }
+    if(y - 1 >= 1 && GameMap::binMap[x][y - 1] != 0)
+    {
+        if(GameMap::binMap[x][y - 1] == 3)//水
+            findAvailableCell(x, y - 1, depth + 2, character, characterNum);
+        else
+            findAvailableCell(x, y - 1, depth + 1, character, characterNum);
+    }
 }
 
 void FindPathAlgorithm::findPath(int x, int y, int endx, int endy, int tempsteps, int totalsteps)
@@ -51,31 +73,43 @@ void FindPathAlgorithm::findPath(int x, int y, int endx, int endy, int tempsteps
         foundPathOrNot = true;
         return;
     }
-    if(x-1>=1&&binMap[x-1][y]!=0)
+    if(x-1>=1&&GameMap::binMap[x-1][y]!=0)
     {
         path.push_back(LEFT);
-        findPath(x-1,y,endx,endy,tempsteps+1,totalsteps);
+        if(GameMap::binMap[x-1][y]!=3)
+            findPath(x-1,y,endx,endy,tempsteps+1,totalsteps);
+        else
+            findPath(x-1,y,endx,endy,tempsteps+2,totalsteps);
         if(foundPathOrNot)return;
         path.pop_back();
     }
-    if(x+1<=50&&binMap[x+1][y]!=0)
+    if(x+1<=50&&GameMap::binMap[x+1][y]!=0)
     {
         path.push_back(RIGHT);
-        findPath(x+1,y,endx,endy,tempsteps+1,totalsteps);
+        if(GameMap::binMap[x+1][y]!=3)
+            findPath(x+1,y,endx,endy,tempsteps+1,totalsteps);
+        else
+            findPath(x+1,y,endx,endy,tempsteps+2,totalsteps);
         if(foundPathOrNot)return;
         path.pop_back();
     }
-    if(y+1<=30&&binMap[x][y+1]!=0)
+    if(y+1<=30&&GameMap::binMap[x][y+1]!=0)
     {
         path.push_back(DOWN);
-        findPath(x,y+1,endx,endy,tempsteps+1,totalsteps);
+        if(GameMap::binMap[x][y+1]!=3)
+            findPath(x,y+1,endx,endy,tempsteps+1,totalsteps);
+        else
+            findPath(x,y+1,endx,endy,tempsteps+2,totalsteps);
         if(foundPathOrNot)return;
         path.pop_back();
     }
-    if(y-1>=1&&binMap[x][y-1]!=0)
+    if(y-1>=1&&GameMap::binMap[x][y-1]!=0)
     {
         path.push_back(UP);
-        findPath(x,y-1,endx,endy,tempsteps+1,totalsteps);
+        if(GameMap::binMap[x][y-1]!=3)
+            findPath(x,y-1,endx,endy,tempsteps+1,totalsteps);
+        else
+            findPath(x,y-1,endx,endy,tempsteps+2,totalsteps);
         if(foundPathOrNot)return;
         path.pop_back();
     }
