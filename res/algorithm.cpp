@@ -29,6 +29,7 @@ void FindPathAlgorithm::findAvailableCell(int x, int y, int depth, Character* ch
             if(character[i]->m_cellx==x&&character[i]->m_celly==y) //遇见有人挡路绕不过去
                 return;
 
+    if(depth > totalMove)return; // 行动点数耗尽
     if(resultMap[x][y] >= 0) //如果此点已经可行，则比较已知最短路和当前路哪个更短
     {
         resultMap[x][y] = min(depth, resultMap[x][y]);
@@ -38,8 +39,7 @@ void FindPathAlgorithm::findAvailableCell(int x, int y, int depth, Character* ch
         resultMap[x][y]=depth;
         v.push_back(std::make_pair(x,y));
     }
-
-    if(depth>=totalMove)return; // 行动点数耗尽
+    if(depth == totalMove)return;
 
     if(x - 1 >= 1 && GameMap::binMap[x - 1][y] != 0) // 向左走
     {

@@ -35,9 +35,6 @@ PlayingMenu::PlayingMenu(QWidget *parent) : QWidget(parent)
 ResultMenu::ResultMenu(QWidget *parent):
     QWidget(parent)
 {
-
-
-
     QPixmap restartPixmap = QPixmap(":/pic/restart.png");
     QPixmap exitPixmap = QPixmap(":/pic/exit_game.png");
     QPixmap videoPixmap = QPixmap(":/pic/review_button.png");
@@ -46,18 +43,18 @@ ResultMenu::ResultMenu(QWidget *parent):
     exitPixmap = exitPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     videoPixmap = videoPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    button[0] = new ClickLabel(200,80,restartPixmap,this, ClickLabel::TRANSPARENTSTYLE);
-    button[1] = new ClickLabel(200,80,exitPixmap,this, ClickLabel::TRANSPARENTSTYLE);
-    button[2] = new ClickLabel(200,80,videoPixmap,this, ClickLabel::TRANSPARENTSTYLE);
+    button[1] = new ClickLabel(200,80,restartPixmap,this, ClickLabel::TRANSPARENTSTYLE);
+    button[2] = new ClickLabel(200,80,exitPixmap,this, ClickLabel::TRANSPARENTSTYLE);
+    button[0] = new ClickLabel(200,80,videoPixmap,this, ClickLabel::TRANSPARENTSTYLE);
 
     for(int i = 0; i < 3; i++)
     {
-        button[i]->setGeometry(700,450+150*i,200,80);
+        button[i]->setGeometry(700,500+150*i,200,80);
         button[i]->raise();
     }
-    connect(button[0], &ClickLabel::clicked,this,[=](){emit restartGame();});
-    connect(button[1], &ClickLabel::clicked,this,[=](){emit exitGame();});
-    connect(button[2], &ClickLabel::clicked,this,[=](){emit startVideo();button[2]->hide();});
+    connect(button[1], &ClickLabel::clicked,this,[=](){emit restartGame();});
+    connect(button[2], &ClickLabel::clicked,this,[=](){emit exitGame();});
+    connect(button[0], &ClickLabel::clicked,this,[=](){emit startVideo();button[2]->hide();});
 }
 void ResultMenu::setResult(bool blueWinOrNot, bool AIOpenOrNot)
 {

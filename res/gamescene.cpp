@@ -12,18 +12,25 @@ std::vector<QImage> GameScene::imageSaver{};
 GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     : QDialog(parent), m_map(GameMap(chapter))
 {
-    setAttribute(Qt::WA_DeleteOnClose);
+    //setAttribute(Qt::WA_DeleteOnClose);
 
+    static int cnt = 0;
+    cnt++;
+    if(cnt==2){
+        cnt++;
+    }
     m_x = 0; m_y = 0;
 
     nowCharacter = nullptr;
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setMouseTracking(true);
 
+    videoShower = new QTimer(this);
+
     playingMenu = new PlayingMenu(this);
     playingMenu->hide();
-    connect(playingMenu, &PlayingMenu::exitGame, [=](){bgm->stop();emit exit();});
-    connect(playingMenu, &PlayingMenu::restartGame, [=](){bgm->stop();emit restart();});
+    connect(playingMenu, &PlayingMenu::exitGame, this, [=](){videoShower->stop();bgm->stop();emit exit();});
+    connect(playingMenu, &PlayingMenu::restartGame, this, [=](){videoShower->stop();bgm->stop();emit restart();});
 
     setButton();
 
@@ -71,7 +78,7 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
         connect(character[i],&Character::dieOneCharacter,this,&GameScene::dieOneCharacterEvent);
         connect(character[i],&Character::submitHint, this, &GameScene::receiveHint);
         connect(character[i],&Character::hideCancelButton,this, [=](){emit cancelButton->clicked();});
-        connect(character[i]->mover,&MoveAnimation::animationStarted,[=](){screenMoveOrNot = false;});
+        connect(character[i]->mover,&MoveAnimation::animationStarted,this,[=](){screenMoveOrNot = false;});
         connect(character[i]->mover,&MoveAnimation::animationFinished,this,[=]()
         {
             //emit nowCharacter->infoChanged();
@@ -94,9 +101,9 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     }
 
     AIOpenOrNot = gameMode;
-    aiController = new AIController(character, characterNum);
+    aiController = new AIController(character, characterNum, this);
     connect(aiController, &AIController::AIRoundBegin, this, [=](){skipButton->hide();});
-    connect(aiController, &AIController::AIRoundFinished, [=](){skipButton->show();nextRound(YOURS);});
+    connect(aiController, &AIController::AIRoundFinished, this, [=](){skipButton->show();nextRound(YOURS);});
 
     resultMenu = new ResultMenu(this);
     resultMenu->hide();
@@ -121,17 +128,21 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     }
 
     repaint();
-
     screenCapturing = true;
     imageSaver.clear();
     screenCaptureTimer = new QTimer(this);
     screenCaptureTimer->setInterval(CAPTURE_SCREEN_INTERVAL);
     screenCaptureTimer->start();
     connect(screenCaptureTimer, &QTimer::timeout, this, [=](){
-        if(screenCapturing == false)return;
+        if(screenCapturing == false)
+        {
+            screenCaptureTimer -> stop();
+            return;
+        }
         else saveImage();
     });
     connect(resultMenu, &ResultMenu::startVideo, this, &GameScene::showVideo);
+
 }
 void GameScene::createCharacter()
 {
@@ -170,13 +181,15 @@ void GameScene::showVideo()
     screenCapturing = false;
     screenCaptureTimer->stop();
     QLabel *label = new QLabel(this);
-    label->setFixedSize(600,400);
-    label->setGeometry(500,0,600,400);
+    label->setFixedSize(900,600);
+    label->setGeometry(350,0,900,600);
     label->raise();
-    videoShower = new QTimer(this);
     videoShower->setInterval(500);
     videoShower->start();
     imageCnt = 0;
+    resultMenu->button[0]->hide();
+    resultMenu->button[1]->hide();
+    resultMenu->button[2]->hide();
     connect(videoShower, &QTimer::timeout,this,[=](){
         label->setPixmap(QPixmap::fromImage(imageSaver[imageCnt]));
         label->show();
@@ -185,9 +198,10 @@ void GameScene::showVideo()
         if(ull(imageCnt) == imageSaver.size())
         {
             videoShower->stop();
+            resultMenu->button[1]->show();
+            resultMenu->button[2]->show();
         }
     });
-
 }
 
 void GameScene::saveImage()
@@ -196,7 +210,7 @@ void GameScene::saveImage()
     QScreen *screen = QApplication::primaryScreen();
     QPixmap pix = screen->grabWindow(this->winId());
     QImage image = pix.toImage().convertToFormat(QImage::Format_RGBA8888);
-    image = image.scaled(600, 400, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    image = image.scaled(900, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     imageSaver.push_back(image);
 }
 bool GameScene::eventFilter(QObject * watched, QEvent *event)
@@ -377,7 +391,6 @@ void GameScene::characterAttrackEvent(Character* t_nowCharacter)
             attrackAl.resultMap[character[i]->m_cellx][character[i]->m_celly] = 1;
             attrackAl.v.push_back(node(character[i]->m_cellx, character[i]->m_celly));
             findOneOrNot = true;
-            //qDebug()<<i<<character[i]->m_cellx<<character[i]->m_celly;
         }
     }
     repaint();
@@ -473,15 +486,17 @@ void GameScene::paintEvent(QPaintEvent *)
     //寻路，把路标蓝
     if(gameState == FINDPATH)
     {
-        for(int i=1;i<=50;i++)
-            for(int j=1;j<=30;j++)
+        for(int i=1;i<=m_map.maxCellx;i++)
+            for(int j=1;j<=m_map.maxCelly;j++)
                 if(moveAl.resultMap[i][j]!=-1)
                 {
                     painter.setPen(QPen(QColor(0,150,255),2,Qt::DotLine));
+                    painter.setBrush(QBrush(QColor(0,20,255,180)));
                     painter.drawRect((i + m_x/CELL_SIZE - 1)*CELL_SIZE,
                                      (j + m_y/CELL_SIZE - 1)*CELL_SIZE,
                                      CELL_SIZE, CELL_SIZE);
                     painter.setPen(Qt::NoPen);
+                    painter.setBrush(Qt::NoBrush);
                 }
     }
 
@@ -491,7 +506,7 @@ void GameScene::paintEvent(QPaintEvent *)
         for(ull i = 0; i < attrackAl.v.size(); i++)
         {
             painter.setPen(QPen(Qt::red,3));
-            painter.setBrush(QBrush(Qt::red));
+            painter.setBrush(QBrush(QColor(255,20,0,180)));
             painter.drawRect((attrackAl.v[i].first + m_x/CELL_SIZE - 1)*CELL_SIZE,
                              (attrackAl.v[i].second + m_y/CELL_SIZE - 1)*CELL_SIZE,
                              CELL_SIZE, CELL_SIZE);

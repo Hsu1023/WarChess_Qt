@@ -3,6 +3,7 @@
 SelectionScene::SelectionScene(int gameMode, QWidget* parent):
     QDialog(parent)
 {
+
     setAttribute(Qt::WA_DeleteOnClose);
 
     setWindowFlags(Qt::WindowCloseButtonHint);
@@ -40,15 +41,18 @@ SelectionScene::SelectionScene(int gameMode, QWidget* parent):
     button[3]->show();
 
     lastSelection = -1;
+    lastGameMode = -1;
 
     connect(button[0], &ClickLabel::clicked, this, [=](){
         zoom(button[0]);
         lastSelection = 1;
+        lastGameMode = gameMode;
         createGameScene(1 ,gameMode);
     });
     connect(button[1], &ClickLabel::clicked, this, [=](){
         zoom(button[1]);
         lastSelection = 2;
+        lastGameMode = gameMode;
         createGameScene(2, gameMode);
     });
     connect(button[3], &ClickLabel::clicked, this, [=](){
@@ -62,14 +66,18 @@ void SelectionScene::createGameScene(int chapter, int gameMode)
 {
     gameScene = new GameScene(chapter, gameMode);
 
-    connect(gameScene, &GameScene::exit, [=](){
-        gameScene->hide();
-        this->hide();
+    connect(gameScene, &GameScene::exit, this, [=](){
+        gameScene->close();
+        delete gameScene;
+        gameScene = nullptr;
+        this->close();
         emit exit();
     });
-    connect(gameScene, &GameScene::restart,[=](){
+    connect(gameScene, &GameScene::restart, this, [=](){
         gameScene->close();
-        emit button[lastSelection - 1]->clicked();
+        delete gameScene;
+        gameScene = nullptr;
+        createGameScene(lastSelection, lastGameMode);
     });
     gameScene->show();
     QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒

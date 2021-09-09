@@ -73,6 +73,5 @@ public slots:
     void endOneCharacterEvent(Character*);
     void dieOneCharacterEvent(Character*);
     void receiveHint(QString str);
-    //void attrackAnimationWaiter();
 };
 #endif // GAMESCENE_H

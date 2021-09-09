@@ -16,6 +16,7 @@ public:
     void paintEvent(QPaintEvent*)override;
     ClickLabel *button[4];
     int lastSelection;
+    int lastGameMode;
     void createGameScene(int chapter, int gameMode);
 signals:
     void exit();
