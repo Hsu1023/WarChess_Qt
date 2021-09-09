@@ -32,6 +32,7 @@ public:
     void AIMoveCharacter(int id);
     void saveImage();
     void showVideo();
+    void createCharacter();
 protected:
     GameMap m_map;
     int m_x, m_y;

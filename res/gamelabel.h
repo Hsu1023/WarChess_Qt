@@ -29,6 +29,7 @@ public:
     void enterEvent(QEvent*)override;
     void leaveEvent(QEvent*)override;
     void paintEvent(QPaintEvent*)override;
+    void setPixmap(QPixmap t_pic);
 signals:
     void clicked();
 };

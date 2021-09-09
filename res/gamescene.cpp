@@ -26,6 +26,7 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     connect(playingMenu, &PlayingMenu::restartGame, [=](){bgm->stop();emit restart();});
 
     setButton();
+
     hint = new HintLabel(this);
     hint->hide();
 
@@ -37,13 +38,7 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     attrackSound = new QSound(":/music/attrack.wav", this);
     clickSound = new QSound(":/music/click.wav", this);
 
-    characterNum = 6;
-    character[0] = new Warrior(10, 10, m_x, m_y,YOURS, this);
-    character[1] = new Swordsman(3, 5, m_x, m_y,YOURS, this);
-    character[2] = new Ninja(15, 14, m_x, m_y,YOURS, this);
-    character[3] = new Warrior(13, 13, m_x, m_y, MINE, this);
-    character[4] = new Swordsman(10, 19, m_x, m_y, MINE, this);
-    character[5] = new Ninja(19, 15, m_x, m_y, MINE, this);
+    createCharacter();
 
     aliveNum[MINE] = aliveNum[YOURS] = 0;
     for(int i=0;i<characterNum;i++)
@@ -138,6 +133,37 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     });
     connect(resultMenu, &ResultMenu::startVideo, this, &GameScene::showVideo);
 }
+void GameScene::createCharacter()
+{
+    characterNum = 8;
+    int tempx[8], tempy[8];
+    for(int i = 0; i < 8; i++)
+    {
+        while(true)
+        {
+            bool success = true;
+            tempx[i] = rand() % m_map.maxCellx + 1;
+            tempy[i] = rand() % m_map.maxCelly + 1;
+            if(GameMap::binMap[tempx[i]][tempy[i]] == 0)
+                success = false;
+            for(int j = 0; j < i; j++)
+            {
+                if(tempx[j]==tempx[i]&&tempy[j]==tempy[i])
+                    success = false;
+            }
+            if(success)break;
+        }
+    }
+    character[0] = new Warrior(tempx[0], tempy[0], m_x, m_y,YOURS, this);
+    character[1] = new Warrior(tempx[1], tempy[1], m_x, m_y,YOURS, this);
+    character[2] = new Swordsman(tempx[2], tempy[2], m_x, m_y,YOURS, this);
+    character[3] = new Ninja(tempx[3], tempy[3], m_x, m_y,YOURS, this);
+
+    character[4] = new Warrior(tempx[4], tempy[4], m_x, m_y, MINE, this);
+    character[5] = new Warrior(tempx[5], tempy[5], m_x, m_y, MINE, this);
+    character[6] = new Swordsman(tempx[6], tempy[6], m_x, m_y, MINE, this);
+    character[7] = new Ninja(tempx[7], tempy[7], m_x, m_y, MINE, this);
+}
 void GameScene::showVideo()
 {
     saveImage();
@@ -173,8 +199,6 @@ void GameScene::saveImage()
     image = image.scaled(600, 400, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     imageSaver.push_back(image);
 }
-
-
 bool GameScene::eventFilter(QObject * watched, QEvent *event)
 {
     if (watched->metaObject()->className() == QStringLiteral("Character"))
@@ -196,24 +220,29 @@ GameScene::~GameScene()
 }
 void GameScene::setButton()
 {
-    cancelButton = new ClickLabel(60,48,QPixmap(":/pic/cancel_button.png"),this);
-    cancelButton->setGeometry(1150,830,60,48);
+    int GAME_BUTTON_WIDTH = 96;
+    int GAME_BUTTON_HEIGHT = 64;
+    cancelButton = new ClickLabel(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT,QPixmap(":/pic/cancel_button.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation),this);
+    cancelButton->setGeometry(1060,830,GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT);
     cancelButton->setStyleSheet("border:none;");
     cancelButton->hide();
 
-    skipButton = new ClickLabel(60,48,QPixmap(":/pic/skip_button.png"),this);
-    skipButton->setGeometry(1250,830,60,48);
+    skipButton = new ClickLabel(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT,QPixmap(":/pic/skip_button.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation),this);
+    skipButton->setGeometry(1190,830,GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT);
     skipButton->setStyleSheet("border:none;");
+    skipButton->raise();
 
-    musicButton = new ClickLabel(60,48,QPixmap(":/pic/music_button_on.png"),this);
-    musicButton->setGeometry(1350,830,60,48);
+    musicButton = new ClickLabel(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT,QPixmap(":/pic/music_button_on.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation),this);
+    musicButton->setGeometry(1320,830,GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT);
     musicButton->setStyleSheet("border:none;");
+    musicButton->raise();
     //bgm->play();
 
 
-    menuButton = new ClickLabel(60,48,QPixmap(":/pic/menu_button.png"),this);
-    menuButton->setGeometry(1450,830,60,48);
+    menuButton = new ClickLabel(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT,QPixmap(":/pic/menu_button.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation),this);
+    menuButton->setGeometry(1450,830,GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT);
     menuButton->setStyleSheet("border:none;");
+    menuButton->raise();
 
     connect(cancelButton, &ClickLabel::clicked, this, [=](){
        zoom(cancelButton);
@@ -230,28 +259,25 @@ void GameScene::setButton()
     connect(skipButton, &ClickLabel::clicked, this, [=](){
         zoom(skipButton);
         clickSound->play();
-        //attrackSound->play();
         cancelButton->hide();
         if(nowCharacter)nowCharacter->selectionDlg->hide();
         nextRound(roundBelonged);
     });
     connect(musicButton, &ClickLabel::clicked, this, [=](){
-
-
-        //emit myLoss();
         zoom(musicButton);
         clickSound->play();
         if(bgm->isFinished()==true)
         {
-            musicButton->setPixmap(QPixmap(":/pic/music_button_on.png"));
+            musicButton->setPixmap(QPixmap(":/pic/music_button_on.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            musicButton->repaint();
             bgm->play();
         }
         else
         {
-            musicButton->setPixmap(QPixmap(":/pic/music_button_off.png"));
+            musicButton->setPixmap(QPixmap(":/pic/music_button_off.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            musicButton->repaint();
             bgm->stop();
         }
-        //TODO:
     });
     connect(menuButton, &ClickLabel::clicked, this, [=](){
         zoom(menuButton);
@@ -491,6 +517,7 @@ void GameScene::paintEvent(QPaintEvent *)
 }
 void GameScene::mousePressEvent(QMouseEvent* event)
 {
+
     if(event->button() == Qt::RightButton)
     {
         if(cancelButton->isHidden()==false)
@@ -498,7 +525,6 @@ void GameScene::mousePressEvent(QMouseEvent* event)
         return;
     }
     updateMousePosition(event);
-
     if(AIOpenOrNot==true&&gameState==AI)return;
 
     if(gameState==BEGIN)

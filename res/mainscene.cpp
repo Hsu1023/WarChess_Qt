@@ -11,7 +11,6 @@ MainScene::MainScene(QWidget* parent):
 
     background.load(":/pic/background.png");
 
-
     QPixmap m_pixmap0 = QPixmap(":/pic/guide_button.png");
     QPixmap m_pixmap1 = QPixmap(":/pic/one_player_button.png");
     QPixmap m_pixmap2 = QPixmap(":/pic/two_players_button.png");
@@ -63,7 +62,6 @@ MainScene::MainScene(QWidget* parent):
                 QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
        this->hide();
     });
-
 }
 void MainScene::paintEvent(QPaintEvent *)
 {

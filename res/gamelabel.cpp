@@ -16,11 +16,11 @@ HintLabel::HintLabel(QString t_str,QWidget * parent, int x, int y):
     setFixedSize(550, 150);
     update();
     show();
+    raise();
 }
 void HintLabel::setText(QString t_str)
 {
     str = t_str;
-
     setFixedSize(550, 150);
 }
 void HintLabel::paintEvent(QPaintEvent * ev)
@@ -68,6 +68,9 @@ void ClickLabel::paintEvent(QPaintEvent *eve)
             painter.setOpacity(0.6);
     }
     painter.drawPixmap(0, 0, pic);
-
+}
+void ClickLabel::setPixmap(QPixmap t_pic)
+{
+    pic = t_pic;
 }
 

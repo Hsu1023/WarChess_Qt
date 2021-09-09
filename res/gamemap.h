@@ -10,6 +10,7 @@ public:
 public:
     QPixmap m_pic;
     int height, width;
+    int maxCellx, maxCelly;
     static int binMap[51][31];
 };
 
