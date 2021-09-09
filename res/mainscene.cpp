@@ -15,7 +15,6 @@ MainScene::MainScene(QWidget* parent):
     QPixmap m_pixmap1 = QPixmap(":/pic/one_player_button.png");
     QPixmap m_pixmap2 = QPixmap(":/pic/two_players_button.png");
 
-
     button[0] = new ClickLabel(400,120,m_pixmap0,this,ClickLabel::TRANSPARENTSTYLE);
     button[0]->setGeometry(610,450,400,120);
     button[0]->raise();
@@ -34,11 +33,13 @@ MainScene::MainScene(QWidget* parent):
     guideScene = new GuideScene(this);
 
     connect(button[0], &ClickLabel::clicked, this, [=](){
+        zoom(button[0]);
         guideScene->show();
         this->hide();
     });
 
     connect(button[1], &ClickLabel::clicked, this,[=](){
+        zoom(button[1]);
         selectionScene = new SelectionScene(ONEPLAYER);
         connect(selectionScene, &SelectionScene::exit,this, [=](){
             this->show();
@@ -51,6 +52,7 @@ MainScene::MainScene(QWidget* parent):
        this->hide();
     });
     connect(button[2], &ClickLabel::clicked, this,[=](){
+        zoom(button[2]);
         selectionScene = new SelectionScene(TWOPLAYERS);
         connect(selectionScene, &SelectionScene::exit,this, [=](){
             this->show();

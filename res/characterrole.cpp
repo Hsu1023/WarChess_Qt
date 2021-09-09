@@ -1,5 +1,6 @@
 #include "characterrole.h"
 
+// 勇士，血量丰厚
 Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
     Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
 {
@@ -14,6 +15,7 @@ Warrior::Warrior( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, 
     propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack,m_attrackable, parent);
     propertyDlg->hide();
 }
+// 忍者，行动力强
 Ninja::Ninja( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
     Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
 {
@@ -28,6 +30,7 @@ Ninja::Ninja( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool
     propertyDlg = new CharacterProperty(name, m_fullhp, m_fullmove, m_attrack,m_attrackable, parent);
     propertyDlg->hide();
 }
+// 剑客，攻击范围广
 Swordsman::Swordsman( int t_cellx, int t_celly, int LocalScreenx, int LocalScreeny, bool belong, QWidget* parent):
     Character( t_cellx, t_celly, LocalScreenx, LocalScreeny,belong, parent)
 {

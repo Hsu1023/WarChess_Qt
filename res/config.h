@@ -55,8 +55,10 @@
 #define ATTRACK_MUSIC_PATH ":/music/attrack.wav"
 #define CLICK_MUSIC_PATH ":/music/click.wav"
 
+// 4进制存储地图：0位不可行区域，1为普通地形，2为沙漠（损伤），3为水（阻碍）
 const int originMap[2][31][51]=
 {
+    //第一张图
     {
     //0
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} ,
@@ -86,6 +88,7 @@ const int originMap[2][31][51]=
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} ,
     },
 
+    // 第二张图
     {
     //0
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -127,16 +130,21 @@ const int originMap[2][31][51]=
     {0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0}
     }
 };
+
+// 地图的总行数和列数
 const int originx[2] = {20,30}, originy[2] = {30,50};
 
+// 最大最小值函数
 inline int min(int x,int y){return x < y ? x : y;}
 inline int max(int x,int y){return x > y ? x : y;}
 
+// 常见变量名的别名
 typedef long long ll;
 typedef unsigned int uint;
 typedef unsigned long long ull;
 typedef std::pair<int,int> node;
 
+// 定义曼哈顿距离
 inline int ManhattanDist(node x, node y)
 {
     return abs(x.first - y.first) + abs(x.second - y.second);

@@ -41,15 +41,18 @@ SelectionScene::SelectionScene(int gameMode, QWidget* parent):
 
     lastSelection = -1;
 
-    connect(button[0], &ClickLabel::clicked, [=](){
+    connect(button[0], &ClickLabel::clicked, this, [=](){
+        zoom(button[0]);
         lastSelection = 1;
         createGameScene(1 ,gameMode);
     });
-    connect(button[1], &ClickLabel::clicked, [=](){
+    connect(button[1], &ClickLabel::clicked, this, [=](){
+        zoom(button[1]);
         lastSelection = 2;
         createGameScene(2, gameMode);
     });
-    connect(button[3], &ClickLabel::clicked, [=](){
+    connect(button[3], &ClickLabel::clicked, this, [=](){
+        zoom(button[3]);
         this->close();
         emit exit();
     });

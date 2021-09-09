@@ -232,7 +232,7 @@ void GameScene::setButton()
     skipButton->setStyleSheet("border:none;");
     skipButton->raise();
 
-    musicButton = new ClickLabel(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT,QPixmap(":/pic/music_button_on.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation),this);
+    musicButton = new ClickLabel(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT,QPixmap(":/pic/music_button_off.png").scaled(GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation),this);
     musicButton->setGeometry(1320,830,GAME_BUTTON_WIDTH,GAME_BUTTON_HEIGHT);
     musicButton->setStyleSheet("border:none;");
     musicButton->raise();

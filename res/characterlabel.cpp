@@ -1,8 +1,10 @@
 #include "characterlabel.h"
 
+// 人物属性栏
 CharacterProperty::CharacterProperty(QString name, int fullhp, int fullmove, int attrack, int attrackable, QWidget *parent):
     QLabel(parent)
 {
+    //初始设定
     setAttribute(Qt::WA_TransparentForMouseEvents, true);
     setMouseTracking(true);
     setFixedSize(165, 150);
