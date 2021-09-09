@@ -38,6 +38,10 @@
 #define HP_HEIGHT 6
 #define HP_DISTANCE 10
 
+#define CAPTURE_SCREEN_INTERVAL 3000
+#define CAPTURED_WIDTH 600
+#define CAPTURED_HEIGHT 400
+
 #define MAP1_PATH  "://pic/map1.png"
 #define MAP2_PATH  "://pic/map2.png"
 #define WARRIOR_PATH ":/pic/warrior.png"

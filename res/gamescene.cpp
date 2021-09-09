@@ -2,7 +2,12 @@
 #include "characterrole.h"
 #include "gamelabel.h"
 #include "algorithm.h"
+#include <QApplication>
+#include <QPixmap>
+#include <QScreen>
 //TODO: cancelButton大一点易看见变化
+
+std::vector<QImage> GameScene::imageSaver{};
 
 GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     : QDialog(parent), m_map(GameMap(chapter))
@@ -98,17 +103,17 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     connect(aiController, &AIController::AIRoundBegin, this, [=](){skipButton->hide();});
     connect(aiController, &AIController::AIRoundFinished, [=](){skipButton->show();nextRound(YOURS);});
 
+    resultMenu = new ResultMenu(this);
+    resultMenu->hide();
+    connect(resultMenu, &ResultMenu::exitGame, this, [=](){emit exit();});
+    connect(resultMenu, &ResultMenu::restartGame, this, [=](){emit restart();});
     connect(this, &GameScene::myWin, [=](){
-        resultMenu = new ResultMenu(1, AIOpenOrNot, this);
-        connect(resultMenu, &ResultMenu::exitGame, this, [=](){emit exit();});
-        connect(resultMenu, &ResultMenu::restartGame, this, [=](){emit restart();});
+        resultMenu->setResult(1, AIOpenOrNot);
         resultMenu->show();
         resultMenu->raise();
     });
     connect(this, &GameScene::myLoss, [=](){
-        resultMenu = new ResultMenu(0, AIOpenOrNot, this);
-        connect(resultMenu, &ResultMenu::exitGame, this, [=](){emit exit();});
-        connect(resultMenu, &ResultMenu::restartGame, this, [=](){emit restart();});
+        resultMenu->setResult(0, AIOpenOrNot);
         resultMenu->show();
         resultMenu->raise();
     });
@@ -119,8 +124,56 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
         if(character[i]->characterState!=Character::DEAD)
             character[i]->updateInfo();
     }
+
     repaint();
+
+    screenCapturing = true;
+    imageSaver.clear();
+    screenCaptureTimer = new QTimer(this);
+    screenCaptureTimer->setInterval(CAPTURE_SCREEN_INTERVAL);
+    screenCaptureTimer->start();
+    connect(screenCaptureTimer, &QTimer::timeout, this, [=](){
+        if(screenCapturing == false)return;
+        else saveImage();
+    });
+    connect(resultMenu, &ResultMenu::startVideo, this, &GameScene::showVideo);
 }
+void GameScene::showVideo()
+{
+    saveImage();
+    screenCapturing = false;
+    screenCaptureTimer->stop();
+    QLabel *label = new QLabel(this);
+    label->setFixedSize(600,400);
+    label->setGeometry(500,0,600,400);
+    label->raise();
+    videoShower = new QTimer(this);
+    videoShower->setInterval(500);
+    videoShower->start();
+    imageCnt = 0;
+    connect(videoShower, &QTimer::timeout,this,[=](){
+        label->setPixmap(QPixmap::fromImage(imageSaver[imageCnt]));
+        label->show();
+        label->raise();
+        imageCnt++;
+        if(ull(imageCnt) == imageSaver.size())
+        {
+            videoShower->stop();
+        }
+    });
+
+}
+
+void GameScene::saveImage()
+{
+    if(!screenCapturing)return;
+    QScreen *screen = QApplication::primaryScreen();
+    QPixmap pix = screen->grabWindow(this->winId());
+    QImage image = pix.toImage().convertToFormat(QImage::Format_RGBA8888);
+    image = image.scaled(600, 400, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    imageSaver.push_back(image);
+}
+
 
 bool GameScene::eventFilter(QObject * watched, QEvent *event)
 {
@@ -183,6 +236,8 @@ void GameScene::setButton()
         nextRound(roundBelonged);
     });
     connect(musicButton, &ClickLabel::clicked, this, [=](){
+
+
         //emit myLoss();
         zoom(musicButton);
         clickSound->play();

@@ -30,6 +30,8 @@ public:
     void nextRound(int last);
     void AIRound();
     void AIMoveCharacter(int id);
+    void saveImage();
+    void showVideo();
 protected:
     GameMap m_map;
     int m_x, m_y;
@@ -51,6 +53,10 @@ protected:
     MoveAnimation *ani;
     PlayingMenu *playingMenu;
     ResultMenu *resultMenu;
+    QTimer *screenCaptureTimer, *videoShower;
+    int imageCnt;
+    bool screenCapturing;
+    static std::vector<QImage>imageSaver;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();

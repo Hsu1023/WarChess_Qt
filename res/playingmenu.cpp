@@ -32,9 +32,36 @@ PlayingMenu::PlayingMenu(QWidget *parent) : QWidget(parent)
     connect(button[2], &ClickLabel::clicked,[=](){emit exitGame();});
 }
 
-ResultMenu::ResultMenu(bool blueWinOrNot, bool AIOpenOrNot, QWidget *parent):
+ResultMenu::ResultMenu(QWidget *parent):
     QWidget(parent)
 {
+
+
+
+    QPixmap restartPixmap = QPixmap(":/pic/restart.png");
+    QPixmap exitPixmap = QPixmap(":/pic/exit_game.png");
+    QPixmap videoPixmap = QPixmap(":/pic/review_button.png");
+
+    restartPixmap = restartPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    exitPixmap = exitPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    videoPixmap = videoPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    button[0] = new ClickLabel(200,80,restartPixmap,this, ClickLabel::TRANSPARENTSTYLE);
+    button[1] = new ClickLabel(200,80,exitPixmap,this, ClickLabel::TRANSPARENTSTYLE);
+    button[2] = new ClickLabel(200,80,videoPixmap,this, ClickLabel::TRANSPARENTSTYLE);
+
+    for(int i = 0; i < 3; i++)
+    {
+        button[i]->setGeometry(700,450+150*i,200,80);
+        button[i]->raise();
+    }
+    connect(button[0], &ClickLabel::clicked,this,[=](){emit restartGame();});
+    connect(button[1], &ClickLabel::clicked,this,[=](){emit exitGame();});
+    connect(button[2], &ClickLabel::clicked,this,[=](){emit startVideo();button[2]->hide();});
+}
+void ResultMenu::setResult(bool blueWinOrNot, bool AIOpenOrNot)
+{
+
     setFixedSize(1600,960);
     shadowDlg = new QWidget(this);
     QString str("QWidget{background-color:rgba(0,0,0,0.6);}");
@@ -42,6 +69,9 @@ ResultMenu::ResultMenu(bool blueWinOrNot, bool AIOpenOrNot, QWidget *parent):
     shadowDlg->setGeometry(0, 0, 1600, 960);
 
     resultLabel = new HintLabel(this, 540, 200);
+
+    for(int i=0;i<3;i++)
+        button[i]->raise();
     if(AIOpenOrNot)
     {
         if(blueWinOrNot)
@@ -57,20 +87,4 @@ ResultMenu::ResultMenu(bool blueWinOrNot, bool AIOpenOrNot, QWidget *parent):
             resultLabel->setText("红方获胜");
     }
     resultLabel->show();
-
-
-    QPixmap restartPixmap = QPixmap(":/pic/restart.png");
-    QPixmap exitPixmap = QPixmap(":/pic/exit_game.png");
-    restartPixmap = restartPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    exitPixmap = exitPixmap.scaled(200, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    button[0] = new ClickLabel(200,80,restartPixmap,this, ClickLabel::TRANSPARENTSTYLE);
-    button[1] = new ClickLabel(200,80,exitPixmap,this, ClickLabel::TRANSPARENTSTYLE);
-    for(int i = 0; i < 2; i++)
-    {
-        button[i]->setGeometry(700,450+150*i,200,80);
-        button[i]->raise();
-    }
-    connect(button[0], &ClickLabel::clicked,[=](){emit restartGame();});
-    connect(button[1], &ClickLabel::clicked,[=](){qDebug()<<"exit"; emit exitGame();});
 }

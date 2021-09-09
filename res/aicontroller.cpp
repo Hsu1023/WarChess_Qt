@@ -11,7 +11,6 @@ void AIController::reset(int t_aicount)
     count = -1;
     aicount = t_aicount;
     usedAI = 0;
-    qDebug()<<"aicount"<<aicount;
 }
 void AIController::start()
 {

@@ -103,7 +103,6 @@ void Character::attrackedEvent(int attrack)
 {
     double d = 1.0*(rand()%40-20)/100 + 1;
     attrack = int(1.0 * d *attrack);
-    qDebug()<<"attracked";
     m_hp -= attrack;
     if(m_hp<=0)
     {

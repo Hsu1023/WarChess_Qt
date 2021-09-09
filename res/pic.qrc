@@ -26,5 +26,6 @@
         <file>pic/guide1.png</file>
         <file>pic/guide2.png</file>
         <file>pic/guide_button.png</file>
+        <file>pic/review_button.png</file>
     </qresource>
 </RCC>
