@@ -42,13 +42,13 @@ void MoveAnimation::moveAlongPath(QWidget* object, std::vector<int>& path)
     // 延时移动
     for(ull i = 0; i < path.size(); i++)
     {
-        QTimer::singleShot(i * (1.5 * duration), [=](){
+        QTimer::singleShot(i * (1.5 * duration),this, [=](){
             moveOneCell(object, path[i], duration);
         });
     }
 
     // 发送动画结束信号
-    QTimer::singleShot((path.size())*1.5*duration,[=](){
+    QTimer::singleShot((path.size())*1.5*duration,this,[=](){
         emit animationFinished();
     });
 }
@@ -87,7 +87,7 @@ void AttrackAnimation::startMove(QWidget *object, int begincellx, int begincelly
     group->start();
 
     // 延时发射结束信号
-    QTimer::singleShot(duration * 2, [=](){
+    QTimer::singleShot(duration * 2, this, [=](){
         emit animationFinished();
     });
 }
@@ -114,5 +114,5 @@ void zoom(QWidget* widget)
     group->start();
 
     // 延迟保证动画效果
-    QTimer::singleShot(ZOOM_DURATION*2, [](){Sleep(100);});
+    QTimer::singleShot(ZOOM_DURATION*2,  [](){Sleep(100);});
 }

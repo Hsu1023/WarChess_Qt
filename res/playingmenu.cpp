@@ -2,6 +2,7 @@
 
 PlayingMenu::PlayingMenu(QWidget *parent) : QWidget(parent)
 { 
+    // 设置默认值
     setWindowFlags(Qt::WindowCloseButtonHint);
     setFixedSize(1600,960);
     shadowDlg = new QWidget(this);
@@ -9,6 +10,7 @@ PlayingMenu::PlayingMenu(QWidget *parent) : QWidget(parent)
     shadowDlg->setStyleSheet(str);
     shadowDlg->setGeometry(0, 0, 1600, 960);
 
+    // 设置三个按钮
     QPixmap returnPixmap = QPixmap(":/pic/back_to_game.png");
     QPixmap restartPixmap = QPixmap(":/pic/restart.png");
     QPixmap exitPixmap = QPixmap(":/pic/exit_game.png");
@@ -27,14 +29,18 @@ PlayingMenu::PlayingMenu(QWidget *parent) : QWidget(parent)
         button[i]->raise();
     }
 
+    // 按下第一个按钮：继续游戏
     connect(button[0], &ClickLabel::clicked, this, &PlayingMenu::hide);
-    connect(button[1], &ClickLabel::clicked,[=](){emit restartGame();});
-    connect(button[2], &ClickLabel::clicked,[=](){emit exitGame();});
+    // 按下第二个按钮：发送重新开始游戏信号
+    connect(button[1], &ClickLabel::clicked,this,[=](){emit restartGame();});
+    // 按下第三个按钮：发送退出游戏信号
+    connect(button[2], &ClickLabel::clicked,this,[=](){emit exitGame();});
 }
 
 ResultMenu::ResultMenu(QWidget *parent):
     QWidget(parent)
 {
+    // 设置三个按钮
     QPixmap restartPixmap = QPixmap(":/pic/restart.png");
     QPixmap exitPixmap = QPixmap(":/pic/exit_game.png");
     QPixmap videoPixmap = QPixmap(":/pic/review_button.png");
@@ -52,13 +58,18 @@ ResultMenu::ResultMenu(QWidget *parent):
         button[i]->setGeometry(700,500+150*i,200,80);
         button[i]->raise();
     }
+    // 按下第一个按钮：重新开始游戏
     connect(button[1], &ClickLabel::clicked,this,[=](){emit restartGame();});
+    // 按下第二个按钮：退出游戏
     connect(button[2], &ClickLabel::clicked,this,[=](){emit exitGame();});
+    // 按下第三个按钮：开始播放战斗回顾
     connect(button[0], &ClickLabel::clicked,this,[=](){emit startVideo();button[2]->hide();});
 }
+// 显示结果
 void ResultMenu::setResult(bool blueWinOrNot, bool AIOpenOrNot)
 {
     setFixedSize(1600,960);
+    // 加阴影遮罩
     shadowDlg = new QWidget(this);
     QString str("QWidget{background-color:rgba(0,0,0,0.6);}");
     shadowDlg->setStyleSheet(str);
@@ -66,8 +77,10 @@ void ResultMenu::setResult(bool blueWinOrNot, bool AIOpenOrNot)
 
     resultLabel = new HintLabel(this, 540, 200);
 
+    // 显示按钮
     for(int i=0;i<3;i++)
         button[i]->raise();
+    // 显示提示框
     if(AIOpenOrNot)
     {
         if(blueWinOrNot)

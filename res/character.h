@@ -11,7 +11,7 @@ class Character: public QLabel
     Q_OBJECT
 
 public:
-    enum CHARACTERSTATE{BEGIN,FINDPATH,FINDATTRACK,END,DEAD};
+    enum CHARACTERSTATE{BEGIN, FINDPATH, FINDATTRACK, END, DEAD};
     Character(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny,bool belong, QWidget* parent = nullptr);
 public:
     int m_hp, m_fullhp, m_move,m_fullmove,m_attrack, m_attrackable;
