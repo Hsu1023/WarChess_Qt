@@ -68,21 +68,18 @@ void SelectionScene::createGameScene(int chapter, int gameMode)
 
     connect(gameScene, &GameScene::exit, this, [=](){
         gameScene->close();
-        delete gameScene;
+        //delete gameScene;
         gameScene = nullptr;
         this->close();
         emit exit();
     });
     connect(gameScene, &GameScene::restart, this, [=](){
         gameScene->close();
-        delete gameScene;
+        //delete gameScene;
         gameScene = nullptr;
         createGameScene(lastSelection, lastGameMode);
     });
     gameScene->show();
-    QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒
-    while (QTime::currentTime() < dieTime)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     this->hide();
 }
 void SelectionScene::paintEvent(QPaintEvent *)

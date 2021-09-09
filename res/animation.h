@@ -19,6 +19,7 @@ signals:
     void widgetUp();
     void widgetRight();
     void widgetLeft();
+    void moveOneCellFinished();
     void animationFinished();
     void animationStarted();
 };

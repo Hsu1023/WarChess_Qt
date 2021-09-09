@@ -22,6 +22,7 @@ SOURCES += \
     guidescene.cpp \
     main.cpp \
     mainscene.cpp \
+    minimap.cpp \
     playingmenu.cpp \
     selectionscene.cpp
 
@@ -39,6 +40,7 @@ HEADERS += \
     gamescene.h \
     guidescene.h \
     mainscene.h \
+    minimap.h \
     playingmenu.h \
     selectionscene.h
 

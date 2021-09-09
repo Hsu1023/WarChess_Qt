@@ -29,6 +29,7 @@ void MoveAnimation::moveOneCell(QWidget* object, int direction, int duration)
     animation->setEndValue(QRect(endx, endy, 64, 64));
     animation->setDuration(duration);
     animation->start();
+    emit moveOneCellFinished();
 }
 // 按照path移动的整体动画，用QTimer延时调用moveOneCell函数
 void MoveAnimation::moveAlongPath(QWidget* object, std::vector<int>& path)

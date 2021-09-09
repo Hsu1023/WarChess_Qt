@@ -58,7 +58,6 @@ ResultMenu::ResultMenu(QWidget *parent):
 }
 void ResultMenu::setResult(bool blueWinOrNot, bool AIOpenOrNot)
 {
-
     setFixedSize(1600,960);
     shadowDlg = new QWidget(this);
     QString str("QWidget{background-color:rgba(0,0,0,0.6);}");

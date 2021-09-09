@@ -9,6 +9,7 @@
 #include "aicontroller.h"
 #include "animation.h"
 #include "playingmenu.h"
+#include "minimap.h"
 
 class GameScene : public QDialog
 {
@@ -57,7 +58,9 @@ protected:
     QTimer *screenCaptureTimer, *videoShower;
     int imageCnt;
     bool screenCapturing;
+    Minimap *minimap;
     static std::vector<QImage>imageSaver;
+    QLabel * videoLabel;
 signals:
     void moveRight(); void notMoveRight();
     void moveLeft(); void notMoveLeft();

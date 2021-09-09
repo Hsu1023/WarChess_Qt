@@ -4,7 +4,6 @@
 MainScene::MainScene(QWidget* parent):
     QDialog(parent)
 {
-
     setWindowFlags(Qt::WindowCloseButtonHint);
     setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setMouseTracking(true);
@@ -59,10 +58,7 @@ MainScene::MainScene(QWidget* parent):
             selectionScene->hide();
         });
         selectionScene->show();
-        QTime dieTime = QTime::currentTime().addMSecs(300);//延时300毫秒
-        while (QTime::currentTime() < dieTime)
-                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-       this->hide();
+        this->hide();
     });
 }
 void MainScene::paintEvent(QPaintEvent *)

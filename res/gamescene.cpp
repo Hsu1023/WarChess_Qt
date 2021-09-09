@@ -13,12 +13,6 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     : QDialog(parent), m_map(GameMap(chapter))
 {
     //setAttribute(Qt::WA_DeleteOnClose);
-
-    static int cnt = 0;
-    cnt++;
-    if(cnt==2){
-        cnt++;
-    }
     m_x = 0; m_y = 0;
 
     nowCharacter = nullptr;
@@ -26,6 +20,7 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     setMouseTracking(true);
 
     videoShower = new QTimer(this);
+    videoLabel = new QLabel(this);
 
     playingMenu = new PlayingMenu(this);
     playingMenu->hide();
@@ -81,10 +76,13 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
         connect(character[i]->mover,&MoveAnimation::animationStarted,this,[=](){screenMoveOrNot = false;});
         connect(character[i]->mover,&MoveAnimation::animationFinished,this,[=]()
         {
-            //emit nowCharacter->infoChanged();
             screenMoveOrNot = true;
             if(AIOpenOrNot == false || character[i]->m_belong == MINE)
                 character[i]->selectionDlg->show();
+        });
+        connect(character[i]->mover,&MoveAnimation::moveOneCellFinished,this,[=]()
+        {
+            minimap->repaint();
         });
         connect(character[i]->attracker,&AttrackAnimation::animationStarted, this, [=]()
         {
@@ -143,6 +141,9 @@ GameScene::GameScene(int chapter, int gameMode, QWidget *parent)
     });
     connect(resultMenu, &ResultMenu::startVideo, this, &GameScene::showVideo);
 
+    minimap = new Minimap(character, characterNum, m_map.maxCellx, m_map.maxCelly, this);
+    minimap->setGeometry(64,64,m_map.maxCellx*10,m_map.maxCelly*10);
+    minimap->show();
 }
 void GameScene::createCharacter()
 {
@@ -180,20 +181,21 @@ void GameScene::showVideo()
     saveImage();
     screenCapturing = false;
     screenCaptureTimer->stop();
-    QLabel *label = new QLabel(this);
-    label->setFixedSize(900,600);
-    label->setGeometry(350,0,900,600);
-    label->raise();
+    //videoLabel = new QLabel(this);
+    videoLabel->setFixedSize(900,600);
+    videoLabel->setGeometry(350,0,900,600);
+    videoLabel->raise();
     videoShower->setInterval(500);
     videoShower->start();
     imageCnt = 0;
     resultMenu->button[0]->hide();
     resultMenu->button[1]->hide();
     resultMenu->button[2]->hide();
+    resultMenu->resultLabel->hide();
     connect(videoShower, &QTimer::timeout,this,[=](){
-        label->setPixmap(QPixmap::fromImage(imageSaver[imageCnt]));
-        label->show();
-        label->raise();
+        videoLabel->setPixmap(QPixmap::fromImage(imageSaver[imageCnt]));
+        videoLabel->show();
+        videoLabel->raise();
         imageCnt++;
         if(ull(imageCnt) == imageSaver.size())
         {
@@ -445,7 +447,7 @@ void GameScene::dieOneCharacterEvent(Character* deadCharacter)
 void GameScene::paintEvent(QPaintEvent *)
 {
     if(gameState == END)return;
-
+    //minimap->repaint();
     QPainter painter(this);
     // 画背景图
     painter.drawPixmap(m_x, m_y, m_map.m_pic);
