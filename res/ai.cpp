@@ -1,60 +1,71 @@
 #include "ai.h"
 
+/* GameAI是模拟AI运行的类，通过调用Algorithm寻路，并调用Animation绘制动画 */
+
 GameAI::GameAI()
 {
 }
-void GameAI::moveCharacter(int id, Character * t_character[], int characterNum)
+// 移动某角色，传入所有角色和行动的角色
+void GameAI::moveCharacter(const int id, Character* t_character[], const int characterNum)
 {
-    character = t_character;
-    nowCharacter = character[id];
-    Al.init(nowCharacter->m_move, nowCharacter);
+    // 初始化
+    m_character = t_character;
+    m_nowCharacter = m_character[id];
+    m_Al.init(m_nowCharacter->m_move, m_nowCharacter);
 
-    int tempx = nowCharacter->m_cellx;
-    int tempy = nowCharacter->m_celly;
+    int tempx = m_nowCharacter->m_cellx;
+    int tempy = m_nowCharacter->m_celly;
 
-    Al.findAvailableCell(tempx, tempy, 0, character, characterNum);
+    // 算法寻找移动可行域
+    m_Al.findAvailableCell(tempx, tempy, 0, m_character, characterNum);
 
-    minDist = 0x3f3f3f3f;
-    node minNode{-1,-1};
-    attrackid = -1;
+    // 寻找距离其他角色的最近距离的初始化
+    m_minDist = 0x3f3f3f3f;
+    node minNode{ -1,-1 };
+    m_attrackid = -1;
 
-
-    for(ull i = 0; i < Al.v.size(); i++)
+    // 寻找距离对手的最近距离
+    for (ull i = 0; i < m_Al.m_availableCell.size(); i++)
     {
-        for(int j = 0; j < characterNum; j++)
-            if(character[j]->m_belong == MINE&&character[j]->characterState!=Character::DEAD)
-        {
-            //if(character[1]->characterState==Character::DEAD)qDebug()<<"DEAD";else qDebug()<<"EXISTING";
-            int tempDist = ManhattanDist(Al.v[i], std::make_pair(character[j]->m_cellx, character[j]->m_celly));
-            if(minDist > tempDist)
+        for (int j = 0; j < characterNum; j++)
+            if (m_character[j]->m_belong == MINE && m_character[j]->m_characterState != Character::DEAD)
             {
-                minNode = Al.v[i];
-                minDist = tempDist;
-                attrackid = j;
+                //if(character[1]->characterState==Character::DEAD)qDebug()<<"DEAD";else qDebug()<<"EXISTING";
+                int tempDist = ManhattanDist(m_Al.m_availableCell[i], std::make_pair(m_character[j]->m_cellx, m_character[j]->m_celly));
+                if (m_minDist > tempDist)
+                {
+                    minNode = m_Al.m_availableCell[i];
+                    m_minDist = tempDist;
+                    m_attrackid = j;
+                }
             }
-        }
     }
-    Al.findPath(nowCharacter->m_cellx, nowCharacter->m_celly, minNode.first, minNode.second, 0, Al.resultMap[minNode.first][minNode.second]);
+    // 寻找如何到达上述最近距离
+    m_Al.findPath(m_nowCharacter->m_cellx, m_nowCharacter->m_celly, minNode.first, minNode.second, 0, m_Al.m_resultMap[minNode.first][minNode.second]);
 
-    connect(nowCharacter->mover, &MoveAnimation::animationFinished, this, &GameAI::attrackCharacter,Qt::UniqueConnection);
+    connect(m_nowCharacter->m_mover, &MoveAnimation::animationFinished, this, &GameAI::attrackCharacter, Qt::UniqueConnection);
 
-    nowCharacter->movePos(Al.resultMap[minNode.first][minNode.second],Al.path);
+    m_nowCharacter->movePos(m_Al.m_resultMap[minNode.first][minNode.second], m_Al.m_path);
 }
-void GameAI::attrackCharacter()
+// 进行攻击操作
+void GameAI::attrackCharacter()const
 {
-    if(minDist <= nowCharacter->m_attrackable)
+    // 如果在最近距离可攻击到敌人，则攻击
+    if (m_minDist <= m_nowCharacter->m_attrackable)
     {
-        nowCharacter->attracker->startMove(nowCharacter, nowCharacter->m_localCellx, nowCharacter->m_localCelly,
-                             character[attrackid]->m_localCellx, character[attrackid]->m_localCelly);
-        connect(nowCharacter->attracker, &AttrackAnimation::animationFinished,this, &GameAI::waitFunc,Qt::UniqueConnection);
+        m_nowCharacter->m_attracker->startMove(m_nowCharacter, m_nowCharacter->m_localCellx, m_nowCharacter->m_localCelly,
+            m_character[m_attrackid]->m_localCellx, m_character[m_attrackid]->m_localCelly);
+        connect(m_nowCharacter->m_attracker, &AttrackAnimation::animationFinished, this, &GameAI::waitFunc, Qt::UniqueConnection);
     }
+    // 否则结束
     else
     {
         emit thisCharacterFinished();
     }
 }
-void GameAI::waitFunc()
+// 等待攻击结束后发送ai执行完毕指令
+void GameAI::waitFunc()const
 {
-    emit character[attrackid]->beAttracked(nowCharacter->m_attrack);
-    QTimer::singleShot(10, [=](){emit thisCharacterFinished();});
+    emit m_character[m_attrackid]->beAttracked(m_nowCharacter->m_attrack);
+    QTimer::singleShot(10, [=]() {emit thisCharacterFinished(); });
 }

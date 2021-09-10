@@ -3,20 +3,22 @@
 
 #include "character.h"
 
-
+// 勇士
 class Warrior: public Character
 {
 public:
-    Warrior(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny,bool belong, QWidget* parent = nullptr);
+    Warrior(const int t_cell_x, const int t_cell_y, const int LocalScreenx, const int LocalScreeny, const bool belong, QWidget* parent = nullptr);
 };
+// 忍者
 class Ninja: public Character
 {
 public:
-    Ninja(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny,bool belong, QWidget* parent = nullptr);
+    Ninja(const int t_cell_x, const int t_cell_y, const int LocalScreenx, const int LocalScreeny, const bool belong, QWidget* parent = nullptr);
 };
+// 剑客
 class Swordsman: public Character
 {
 public:
-    Swordsman(int t_cell_x, int t_cell_y, int LocalScreenx, int LocalScreeny,bool belong, QWidget* parent = nullptr);
+    Swordsman(const int t_cell_x, const int t_cell_y, const int LocalScreenx, const int LocalScreeny, const bool belong, QWidget* parent = nullptr);
 };
 #endif // CHARACTERROLE_H

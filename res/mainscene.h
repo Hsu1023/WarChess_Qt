@@ -10,13 +10,14 @@
 class MainScene :public QDialog
 {
 public:
-    MainScene(QWidget* parent = nullptr);
-public:
-    SelectionScene *selectionScene;
-    GuideScene *guideScene;
-    QPixmap background;
+    explicit MainScene(QWidget* parent = nullptr);
+protected:
+    SelectionScene *m_selectionScene; // 选择场景
+    GuideScene *m_guideScene; // 教程场景
+    QPixmap m_background; // 主页图片
+    ClickLabel *m_button[3]; // 主页上三个选择案件
+protected:
     void paintEvent(QPaintEvent*)override;
-    ClickLabel *button[3];
 };
 
 #endif // MAINSCENE_H

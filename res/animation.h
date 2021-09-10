@@ -12,16 +12,18 @@ class MoveAnimation :public QWidget
 public:
     MoveAnimation(QWidget *parent=nullptr);
 public:
-    void moveOneCell(QWidget* object, int direction, int duration = ANIMATION_DURATION);
-    void moveAlongPath(QWidget* object, std::vector<int>&);
+    // 移动固定一格的动画，用QPropertyAnimation写成
+    void moveOneCell(QWidget* object, const int direction, const int duration = ANIMATION_DURATION);
+    // 按照path移动的整体动画，用QTimer延时调用moveOneCell函数
+    void moveAlongPath(QWidget* object, const std::vector<int>&);
 signals:
-    void widgetDown();
-    void widgetUp();
-    void widgetRight();
-    void widgetLeft();
-    void moveOneCellFinished();
-    void animationFinished();
-    void animationStarted();
+    void widgetDown()const ; // 人物上移
+    void widgetUp()const ; // 人物下移
+    void widgetRight()const ; // 人物右移
+    void widgetLeft()const ; // 人物左移
+    void moveOneCellFinished()const ; // moveOneCell函数执行结束
+    void animationFinished()const ; // 动画开始执行
+    void animationStarted()const ; // moveAlongPath函数执行结束
 };
 
 class AttrackAnimation :public QWidget
@@ -31,11 +33,14 @@ class AttrackAnimation :public QWidget
 public:
     AttrackAnimation(QWidget *parent = nullptr);
 public:
-    void startMove(QWidget* object, int beginx, int beginy, int endx, int endy, int duration = ANIMATION_DURATION);
+    // 攻击某格敌人的动画
+    void startMove(QWidget* object, const int beginx, const int beginy, const int endx, const int endy, const int duration = ANIMATION_DURATION);
 signals:
-    void animationFinished();
-    void animationStarted();
+    void animationFinished()const ; // 动画开始执行
+    void animationStarted()const ; // 动画执行结束
 };
 
+// 弹跳动画声明
 void zoom(QWidget*);
+
 #endif // ANIMATION_H

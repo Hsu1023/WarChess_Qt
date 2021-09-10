@@ -6,12 +6,12 @@
 class GameMap
 {
 public:
-    GameMap(int id);
+    explicit GameMap(const int id);
 public:
-    QPixmap m_pic;
-    int height, width;
-    int maxCellx, maxCelly;
-    static int binMap[51][31];
+    int m_height, m_width; // 地形size（像素）
+    int m_maxCellx, m_maxCelly; // 地形size(格子)
+    static int binMap[51][31]; // 四进制储存地形
+    QPixmap m_pic; // 地形图片
 };
 
 #endif // GAMEMAP_H

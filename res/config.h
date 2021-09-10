@@ -15,33 +15,36 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <windows.h>
 #include <QRgb>
 #include <QThread>
 #include <QSound>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
 #include <QMovie>
+
 // 主窗口参数
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 960
 #define WINDOW_BOUNDARY 64
-
-//
 #define CELL_SIZE 64
+#define MAP_HEIGHT m_map.m_height
+#define MAP_WIDTH m_map.m_width
 
-//
+// QTimer参数
 #define MOUSE_MOVE_TIMER_INTERVAL 150
 #define ANIMATION_DURATION 200
 #define ZOOM_DURATION 300
+#define CAPTURE_SCREEN_INTERVAL 3000
 
+// 血条
 #define HP_HEIGHT 6
 #define HP_DISTANCE 10
 
-#define CAPTURE_SCREEN_INTERVAL 3000
+// 截图
 #define CAPTURED_WIDTH 600
 #define CAPTURED_HEIGHT 400
 
+// 图片路径
 #define MAP1_PATH  "://pic/map1.png"
 #define MAP2_PATH  "://pic/map2.png"
 #define WARRIOR_PATH ":/pic/warrior.png"
@@ -49,8 +52,12 @@
 #define SWORDSMAN_PATH ":/pic/swordsman.png"
 #define GUIDE1_PATH ":/pic/guide1.png"
 #define GUIDE2_PATH ":/pic/guide2.png"
+#define MAIN_SCENE_BACKGROUND_PATH ":/pic/background.png"
+#define MAIN_SCENE_GUIDE_BUTTON_PATH ":/pic/guide_button.png"
+#define MAIN_SCENE_ONE_PLAYER_BUTTON_PATH ":/pic/one_player_button.png"
+#define MAIN_SCENE_TWO_PLAYERS_BUTTON_PATH ":/pic/two_players_button.png"
 
-
+// 音乐路径
 #define BGM_PATH ":/music/bgm.wav"
 #define ATTRACK_MUSIC_PATH ":/music/attrack.wav"
 #define CLICK_MUSIC_PATH ":/music/click.wav"
@@ -154,6 +161,7 @@ inline int ManhattanDist(int x1, int y1, int x2, int y2)
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
+// 一些枚举变量
 enum BELONGING{MINE, YOURS};
 enum DERECTION{UP, DOWN, LEFT, RIGHT};
 enum GAMEMODE{ONEPLAYER = 1, TWOPLAYERS = 0};

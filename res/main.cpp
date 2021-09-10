@@ -5,7 +5,7 @@
 #include <QApplication>
 #include <QMetaType>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // 设置伪随机种子
     srand(time(0));
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     // 适应中文
-    QTextCodec *codec = QTextCodec::codecForName("utf8");
+    QTextCodec* codec = QTextCodec::codecForName("utf8");
     QTextCodec::setCodecForLocale(codec);
 
     MainScene w;

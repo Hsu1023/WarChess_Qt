@@ -12,20 +12,24 @@
 class AIController : public QTimer
 {
     Q_OBJECT
+protected:
+    Character ** m_character; // 场上的角色的头指针
+    int m_characterNum; // 场上角色数
+    int m_count; // 遍历0~characterNum-1的循环变量
+    int m_aicount, m_usedAI; // AI方有多少角色及已使用角色数
+    GameAI *m_gameAI; // GameAI对象
 public:
-    Character ** character; // 场上的角色的头指针
-    int characterNum; // 场上角色数
-    int count; // 遍历0~characterNum-1的循环变量
-    int aicount, usedAI; // AI方有多少角色及已使用角色数
-    GameAI *gameAI; // GameAI对象
-public:
-    AIController(Character *t_character[], int t_characterNum, QWidget* parent = nullptr);
+    AIController(Character *t_character[], const int t_characterNum, QWidget* parent = nullptr);
+    // 开始AI回合前，需要调用以初始化参数
     void reset(int aicount);
+    // 进入AI循环
     void start();
+protected:
+    // 等待到GameAI操纵角色行动完成后，使下一个角色行动
     void loop();
 signals:
-    void AIRoundFinished(); // AI回合开始信号
-    void AIRoundBegin(); // AI回合结束信号
+    void AIRoundFinished() const ; // AI回合开始信号
+    void AIRoundBegin() const ; // AI回合结束信号
 };
 
 #endif // AICONTROLLER_H
